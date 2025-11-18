@@ -32,5 +32,29 @@
             </li>
         @endforeach
     </ul>
+    <hr>
+    <h3>🎟️ Guest List (Ticket Sales)</h3>
+    <table border="1" cellpadding="5" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Guest Name</th>
+                <th>Event</th>
+                <th>Tickets Qty</th>
+                <th>Total Paid</th>
+                <th>Purchase Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($bookings as $booking)
+            <tr>
+                <td>{{ $booking->user->name }}</td>
+                <td>{{ $booking->event->name }}</td>
+                <td>{{ $booking->tickets }}</td>
+                <td>${{ $booking->total_price }}</td>
+                <td>{{ $booking->created_at->format('M d, H:i') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
 </body>
 </html>

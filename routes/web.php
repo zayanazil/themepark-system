@@ -59,9 +59,8 @@ Route::middleware(['auth', 'role:hotel_manager'])->group(function () {
 
 // Ferry Staff
 Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
-    Route::get('/ferry/dashboard', function () {
-        return "<h1>Ferry Staff Dashboard</h1><p>Ticket scanning feature coming soon.</p><form method='POST' action='/logout'>".csrf_field()."<button>Logout</button></form>";
-    });
+    Route::get('/ferry/dashboard', [App\Http\Controllers\AdminFerryController::class, 'index']);
+    Route::resource('manage/ferry', App\Http\Controllers\AdminFerryController::class);
 });
 
 // Theme Park Staff
@@ -72,9 +71,7 @@ Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
 
 // Visitor
 Route::middleware(['auth', 'role:visitor'])->group(function () {
-    Route::get('/visitor/dashboard', function () {
-        return view('visitor.dashboard');
-    });
+    Route::get('/visitor/dashboard', [App\Http\Controllers\VisitorDashboardController::class, 'index']);
 
     Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index']);
     Route::post('/book-hotel', [App\Http\Controllers\HotelController::class, 'store']);
