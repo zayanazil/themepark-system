@@ -1,13 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; // Import this!
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VisitorDashboardController;
+use App\Http\Controllers\HotelController;
+use App\Http\Controllers\FerryController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\AdminHotelController;
+use App\Http\Controllers\AdminFerryController;
+use App\Http\Controllers\AdminEventController;
+use App\Http\Controllers\UserAdminController;
+use App\Http\Controllers\AdController;
+use App\Http\Controllers\MapController;
 
 // 1. THE SMART ROOT ROUTE
-// This acts as a traffic controller.
-// If logged in -> Go to specific dashboard.
-// If NOT logged in -> Go to Login page.
 Route::get('/', function () {
     if (!Auth::check()) {
         return redirect('/login');
@@ -17,7 +24,7 @@ Route::get('/', function () {
 
     return match($role) {
         'admin' => redirect('/admin/dashboard'),
-        'hotel_manager' => redirect('/hotel/dashboard'),
+        'hotel_manager' => redirect('/hotel/selection'), // <--- FIXED: Points to Selection Menu now
         'ferry_staff' => redirect('/ferry/dashboard'),
         'theme_park_staff' => redirect('/themepark/dashboard'),
         default => redirect('/visitor/dashboard'),
@@ -27,58 +34,63 @@ Route::get('/', function () {
 // 2. GUEST ROUTES
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::get('/register', [AuthController::class, 'registerForm']);
 Route::post('/register', [AuthController::class, 'register']);
-
-// 3. LOGOUT ROUTE (Essential)
 Route::middleware('auth')->post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
-// --- 4. PROTECTED ROUTES ---
+// 3. PROTECTED ROUTES
 
-// Admin
+// --- ADMIN ---
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard'); // Ensure you create this file or reuse the previous logic
+        return view('admin.dashboard');
     });
-    // Admin Management Routes
-    Route::resource('manage/users', App\Http\Controllers\UserAdminController::class);
-    Route::resource('manage/ads', App\Http\Controllers\AdController::class);
-    Route::resource('manage/map', App\Http\Controllers\MapController::class);
+    Route::resource('manage/users', UserAdminController::class);
+    Route::resource('manage/ads', AdController::class);
+    Route::resource('manage/map', MapController::class);
 });
 
 // Hotel Manager
 Route::middleware(['auth', 'role:hotel_manager'])->group(function () {
-    // We direct the dashboard directly to the controller index
-    Route::get('/hotel/dashboard', [App\Http\Controllers\AdminHotelController::class, 'index']);
+    Route::get('/hotel/selection', [AdminHotelController::class, 'index'])->name('hotel.select');
 
-    // Resource route for create/delete
-    Route::resource('manage/hotels', App\Http\Controllers\AdminHotelController::class);
+    // NEW: Handle Dropdown Submit
+    Route::post('/hotel/select', [AdminHotelController::class, 'handleSelection']);
+
+    Route::get('/manage/hotel/{id}', [AdminHotelController::class, 'showDashboard']);
+    Route::post('/manage/rooms', [AdminHotelController::class, 'storeRoom']); // New Route
+
+    Route::post('/manage/hotels', [AdminHotelController::class, 'store']); // Admin add hotel
+
+    // ... bookings and promos routes ...
+    Route::get('/manage/booking/{id}/edit', [AdminHotelController::class, 'editBooking']);
+    Route::put('/manage/booking/{id}', [AdminHotelController::class, 'updateBooking']);
+    Route::post('/manage/promotions', [AdminHotelController::class, 'storePromotion']);
 });
 
-// Ferry Staff
+// --- FERRY STAFF ---
 Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
-    Route::get('/ferry/dashboard', [App\Http\Controllers\AdminFerryController::class, 'index']);
-    Route::resource('manage/ferry', App\Http\Controllers\AdminFerryController::class);
+    Route::get('/ferry/dashboard', [AdminFerryController::class, 'index']);
+    Route::resource('manage/ferry', AdminFerryController::class);
 });
 
-// Theme Park Staff
+// --- THEME PARK STAFF ---
 Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
-    Route::get('/themepark/dashboard', [App\Http\Controllers\AdminEventController::class, 'index']);
-    Route::resource('manage/events', App\Http\Controllers\AdminEventController::class);
+    Route::get('/themepark/dashboard', [AdminEventController::class, 'index']);
+    Route::resource('manage/events', AdminEventController::class);
 });
 
-// Visitor
+// --- VISITOR ---
 Route::middleware(['auth', 'role:visitor'])->group(function () {
-    Route::get('/visitor/dashboard', [App\Http\Controllers\VisitorDashboardController::class, 'index']);
+    Route::get('/visitor/dashboard', [VisitorDashboardController::class, 'index']);
 
-    Route::get('/hotels', [App\Http\Controllers\HotelController::class, 'index']);
-    Route::post('/book-hotel', [App\Http\Controllers\HotelController::class, 'store']);
+    Route::get('/hotels', [HotelController::class, 'index']);
+    Route::post('/book-hotel', [HotelController::class, 'store']);
 
-    Route::get('/ferry', [App\Http\Controllers\FerryController::class, 'index']);
-    Route::post('/ferry', [App\Http\Controllers\FerryController::class, 'store']);
+    Route::get('/ferry', [FerryController::class, 'index']);
+    Route::post('/ferry', [FerryController::class, 'store']);
 
-    Route::get('/events', [App\Http\Controllers\EventController::class, 'index']);
-    Route::post('/events/book', [App\Http\Controllers\EventController::class, 'bookEvent']);
+    Route::get('/events', [EventController::class, 'index']);
+    Route::post('/events/book', [EventController::class, 'bookEvent']);
 });
