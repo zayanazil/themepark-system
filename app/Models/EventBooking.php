@@ -16,8 +16,13 @@ class EventBooking extends Model
         'total_price'
     ];
 
+    // THIS WAS MISSING
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
+    // This connects it to the Event details
     public function event() {
         return $this->belongsTo(ThemeParkEvent::class, 'event_id');
     }
 }
-
