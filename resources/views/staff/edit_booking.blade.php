@@ -6,6 +6,7 @@
     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <h2>Edit Booking #{{ $booking->id }}</h2>
         <p>Guest: <strong>{{ $booking->user->name }}</strong></p>
+        <p>Hotel: <strong>{{ $booking->hotel->name }}</strong></p>
 
         <form action="/manage/booking/{{ $booking->id }}" method="POST">
             @csrf
@@ -18,10 +19,10 @@
             <input type="date" name="check_out" value="{{ $booking->check_out }}" required style="width:100%; padding: 8px; margin-bottom: 10px;"><br>
 
             <label><strong>Room Type:</strong></label><br>
-            <select name="room_type_id" style="width:100%; padding: 8px; margin-bottom: 10px;">
-                @foreach($booking->hotel->roomTypes as $type)
-                    <option value="{{ $type->id }}" {{ $booking->room_type_id == $type->id ? 'selected' : '' }}>
-                        {{ $type->name }} (${{ $type->price_per_night }})
+            <select name="room_type" style="width:100%; padding: 8px; margin-bottom: 10px;">
+                @foreach(['Single', 'Couple', 'Family', 'Deluxe'] as $type)
+                    <option value="{{ $type }}" {{ $booking->room_type == $type ? 'selected' : '' }}>
+                        {{ $type }}
                     </option>
                 @endforeach
             </select><br>
