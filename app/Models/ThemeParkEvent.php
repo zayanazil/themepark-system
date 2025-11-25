@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class ThemeParkEvent extends Model
 {
     use HasFactory;
-
-    // Added fillable so we can seed data later
-    protected $fillable = ['name', 'description', 'capacity', 'event_date', 'event_time', 'price'];
+    // Added 'category'
+    protected $fillable = ['name', 'description', 'category', 'capacity', 'event_date', 'event_time', 'price'];
 
     public function bookings() {
         return $this->hasMany(EventBooking::class, 'event_id');
+    }
+
+    public function promotions() {
+        return $this->hasMany(EventPromotion::class, 'event_id');
     }
 }

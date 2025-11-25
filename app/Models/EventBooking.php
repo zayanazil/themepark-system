@@ -8,21 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class EventBooking extends Model
 {
     use HasFactory;
+    // Added 'status'
+    protected $fillable = ['user_id', 'event_id', 'tickets', 'total_price', 'status'];
 
-    protected $fillable = [
-        'user_id',
-        'event_id',
-        'tickets',
-        'total_price'
-    ];
-
-    // THIS WAS MISSING
-    public function user() {
-        return $this->belongsTo(User::class);
-    }
-
-    // This connects it to the Event details
-    public function event() {
-        return $this->belongsTo(ThemeParkEvent::class, 'event_id');
-    }
+    public function user() { return $this->belongsTo(User::class); }
+    public function event() { return $this->belongsTo(ThemeParkEvent::class, 'event_id'); }
 }

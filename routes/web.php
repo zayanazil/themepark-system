@@ -75,10 +75,15 @@ Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
     Route::resource('manage/ferry', AdminFerryController::class);
 });
 
-// --- THEME PARK STAFF ---
+// Theme Park Staff
 Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
     Route::get('/themepark/dashboard', [AdminEventController::class, 'index']);
     Route::resource('manage/events', AdminEventController::class);
+
+    // NEW ROUTES
+    Route::post('/themepark/sell', [AdminEventController::class, 'manualSale']);
+    Route::post('/themepark/validate', [AdminEventController::class, 'validateTicket']);
+    Route::post('/themepark/promote', [AdminEventController::class, 'storePromotion']);
 });
 
 // --- VISITOR ---
