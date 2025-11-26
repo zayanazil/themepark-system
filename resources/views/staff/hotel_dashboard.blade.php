@@ -1,24 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Managing: {{ $hotel->name }}</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f8f9fa; }
-        .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top:0; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    </style>
-</head>
-<body>
+@extends('layouts.admin')
 
-    <a href="/hotel/selection">← Back to Selection</a>
-    <h1>Managing: {{ $hotel->name }}</h1>
+@section('content')
 
-    @if(session('success')) <p style="color: green;">{{ session('success') }}</p> @endif
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Managing: {{ $hotel->name }}</h1>
 
-    <div class="section">
-        <h2>🔑 Room Management</h2>
+        @if(auth()->user()->role === 'admin')
+            <form action="/manage/hotels/{{ $hotel->id }}" method="POST" onsubmit="return confirm('Delete this entire hotel?');">
+                @csrf @method('DELETE')
+                <button style="background: red; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Delete Hotel</button>
+            </form>
+        @endif
+    </div>
+
+    <div class="card">
+        <h2 style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top:0;">🔑 Room Management</h2>
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
 
             <div>
@@ -40,50 +36,55 @@
             </div>
 
             <div style="background: #eef; padding: 15px; border-radius: 5px; height: fit-content;">
-                <h3>Add Room</h3>
+                <h3>Add New Room</h3>
                 <form action="/manage/rooms" method="POST">
                     @csrf
                     <input type="hidden" name="hotel_id" value="{{ $hotel->id }}">
 
-                    <label>Room Number (e.g. 101):</label><br>
-                    <input type="text" name="room_number" required style="width:90%"><br><br>
+                    <label>Room Number:</label><br>
+                    <input type="text" name="room_number" required style="width:100%; padding:8px; margin-bottom:10px;"><br>
 
                     <label>Room Type:</label><br>
-                    <select name="type" required style="width:90%; padding: 5px;">
+                    <select name="type" required style="width:100%; padding:8px; margin-bottom:10px;">
                         <option value="Single">Single</option>
                         <option value="Couple">Couple</option>
                         <option value="Family">Family</option>
                         <option value="Deluxe">Deluxe</option>
-                    </select><br><br>
+                    </select><br>
 
                     <label>Price ($):</label><br>
-                    <input type="number" name="price" required style="width:90%"><br><br>
+                    <input type="number" name="price" required style="width:100%; padding:8px; margin-bottom:20px;"><br>
 
-                    <button style="width:100%; background: green; color: white; padding: 10px; border:none;">Add Room</button>
+                    <button style="width:100%; background: green; color: white; padding: 10px; border:none; cursor: pointer; border-radius:4px;">Add Room</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <div class="section">
-        <h2>📅 Bookings</h2>
-        <table>
-            <thead>
-                <tr><th>Guest</th><th>Type</th><th>Dates</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                @foreach($bookings as $booking)
-                <tr>
-                    <td>{{ $booking->user->name }}</td>
-                    <td>{{ $booking->room_type }}</td>
-                    <td>{{ $booking->check_in }} - {{ $booking->check_out }}</td>
-                    <td>{{ $booking->status }}</td>
-                    <td><a href="/manage/booking/{{ $booking->id }}/edit">Edit</a></td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="card">
+        <h2 style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top:0;">📅 Bookings</h2>
+        @if($bookings->isEmpty())
+            <p>No active bookings for this hotel.</p>
+        @else
+            <table>
+                <thead>
+                    <tr><th>Guest</th><th>Type</th><th>Dates</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    @foreach($bookings as $booking)
+                    <tr>
+                        <td>{{ $booking->user->name }}</td>
+                        <td>{{ $booking->room_type }}</td>
+                        <td>{{ $booking->check_in }} - {{ $booking->check_out }}</td>
+                        <td>{{ ucfirst($booking->status) }}</td>
+                        <td>
+                            <a href="/manage/booking/{{ $booking->id }}/edit" style="color: blue; text-decoration: underline;">Edit/Cancel</a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 
-</body>
-</html>
+@endsection

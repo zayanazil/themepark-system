@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\AdminDashboardController;
 
 // 1. THE SMART ROOT ROUTE
 Route::get('/', function () {
@@ -43,12 +44,20 @@ Route::middleware('auth')->post('/logout', [AuthController::class, 'logout'])->n
 
 // --- ADMIN ---
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    });
+    // Dashboard
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
+
+    // Reports
+    Route::get('/admin/reports', [AdminDashboardController::class, 'reports']);
+
+    // Management Resources
     Route::resource('manage/users', UserAdminController::class);
     Route::resource('manage/ads', AdController::class);
     Route::resource('manage/map', MapController::class);
+
+    // Admin access to Hotel Infrastructure
+    Route::post('/manage/hotels', [AdminHotelController::class, 'store']);
+    Route::delete('/manage/hotels/{id}', [AdminHotelController::class, 'destroy']);
 });
 
 // Hotel Manager

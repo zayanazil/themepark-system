@@ -1,62 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-    <style>
-        body { font-family: sans-serif; padding: 30px; background-color: #f4f6f8; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
-        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; text-align: center; transition: 0.2s; }
-        .card:hover { background-color: #f9f9f9; border-color: #bbb; }
-        .card a { text-decoration: none; color: #007bff; font-weight: bold; font-size: 18px; display: block; height: 100%; }
-        .logout { margin-top: 30px; text-align: center; }
-        button { background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
+@extends('layouts.admin')
 
-<div class="container">
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ auth()->user()->name }}. Manage your application below.</p>
+@section('content')
+    <h1>System Overview</h1>
 
-    <div class="grid">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
         <div class="card">
-            <a href="/manage/users">
-                <h3>👥 Manage Users</h3>
-                <p>Promote staff, view visitors.</p>
-            </a>
+            <h3 style="margin:0; color:#777;">Total Revenue</h3>
+            <h2 style="margin:5px 0; color:green;">${{ number_format($totalRevenue) }}</h2>
         </div>
-
         <div class="card">
-            <a href="/manage/ads">
-                <h3>📢 Manage Ads</h3>
-                <p>Create and edit advertisements.</p>
-            </a>
+            <h3 style="margin:0; color:#777;">Total Users</h3>
+            <h2 style="margin:5px 0;">{{ $totalUsers }}</h2>
         </div>
-
         <div class="card">
-            <a href="/manage/map">
-                <h3>📍 Manage Map</h3>
-                <p>Add locations and pins.</p>
-            </a>
+            <h3 style="margin:0; color:#777;">Hotel Revenue</h3>
+            <h2 style="margin:5px 0;">${{ number_format($hotelRevenue) }}</h2>
         </div>
-
         <div class="card">
-            <a href="/manage/hotels">
-                <h3>🏨 Hotel Overview</h3>
-                <p>View all hotels and rooms.</p>
-            </a>
+            <h3 style="margin:0; color:#777;">Park Revenue</h3>
+            <h2 style="margin:5px 0;">${{ number_format($eventRevenue) }}</h2>
         </div>
     </div>
 
-    <div class="logout">
-        <form method="POST" action="/logout">
-            @csrf
-            <button type="submit">Logout</button>
-        </form>
+    <div class="card">
+        <h3>Recent Hotel Bookings</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Hotel</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($recentBookings as $booking)
+                <tr>
+                    <td>{{ $booking->user->name }}</td>
+                    <td>{{ $booking->hotel->name }}</td>
+                    <td>${{ number_format($booking->total_price) }}</td>
+                    <td>{{ $booking->created_at->format('M d, Y') }}</td>
+                    <td>{{ ucfirst($booking->status) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-</div>
-
-</body>
-</html>
+@endsection
