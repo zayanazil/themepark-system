@@ -69,10 +69,15 @@ Route::middleware(['auth', 'role:hotel_manager'])->group(function () {
     Route::post('/manage/promotions', [AdminHotelController::class, 'storePromotion']);
 });
 
-// --- FERRY STAFF ---
+// Ferry Staff
 Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
     Route::get('/ferry/dashboard', [AdminFerryController::class, 'index']);
-    Route::resource('manage/ferry', AdminFerryController::class);
+
+    // Actions
+    Route::post('/ferry/trips', [AdminFerryController::class, 'storeTrip']);
+    Route::delete('/ferry/trips/{id}', [AdminFerryController::class, 'deleteTrip']);
+    Route::post('/ferry/tickets', [AdminFerryController::class, 'storeTicket']);
+    Route::put('/ferry/tickets/{id}', [AdminFerryController::class, 'updateStatus']);
 });
 
 // Theme Park Staff
