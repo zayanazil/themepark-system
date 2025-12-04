@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theme Park Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
             margin: 0;
@@ -274,7 +274,8 @@
     </style>
 </head>
 <body>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <div class="nav">
         <h2>
             <i data-lucide="ferris-wheel"></i>
@@ -428,6 +429,9 @@
                     Map Points
                 </h3>
                 <div class="card">
+                    <!-- ADD MAP HERE -->
+                    <div id="map" style="height: 400px; border-radius: 8px; margin-bottom: 16px;"></div>
+                    <!-- Keep the list below the map (optional) -->
                     @foreach($locations as $loc)
                         <div class="location-item">
                             <div class="location-name">{{ $loc->name }}</div>
@@ -442,6 +446,19 @@
 
     <script>
         lucide.createIcons();
+        const map = L.map('map', {
+            maxBounds: [
+                    [4.18216, 73.520],  // Southwest corner
+                    [4.16474, 73.49753]   // Northeast corner
+                ],
+            maxBoundsViscosity: 0.5
+        }).setView([4.17454, 73.51004], 15);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap, © CartoDB',
+            minZoom: 14, // prevent users zooming out too much (delete if issue) | ideally would be 15, 14 for mobile support
+            maxZoom: 19
+        }).addTo(map);
     </script>
 
 </body>
