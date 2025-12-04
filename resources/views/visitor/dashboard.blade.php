@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theme Park Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -195,6 +196,26 @@
             line-height: 1.6;
         }
         
+        .ad-body {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-top: 8px;
+        }
+        
+        .ad-image {
+            width: 60%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        
+        .ad-text {
+            margin: 0;
+            flex: 1;
+        }
+        
         .location-item {
             margin-bottom: 16px;
             padding-bottom: 16px;
@@ -222,6 +243,32 @@
         @media (max-width: 968px) {
             .container {
                 grid-template-columns: 1fr;
+            }
+            
+            .ad-body {
+                flex-direction: column;
+            }
+            
+            .ad-image {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .nav form {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .nav button {
+                width: 100%;
             }
         }
     </style>
@@ -359,10 +406,19 @@
                     News
                 </h3>
                 @foreach($ads as $ad)
-                    <div class="card news-card">
-                        <h3>{{ $ad->title }}</h3>
-                        <p>{{ $ad->content }}</p>
+                <div class="card news-card">
+                    <h3>{{ $ad->title }}</h3>
+                    <div class="ad-body">
+                        @if($ad->image_url)
+                        <img src="{{ asset($ad->image_url) }}"
+                             alt="{{ $ad->title }}"
+                             class="ad-image">
+                        @endif
+                        <p class="ad-text">
+                            {{ $ad->content }}
+                        </p>
                     </div>
+                </div>
                 @endforeach
             </div>
 
