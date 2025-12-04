@@ -8,26 +8,37 @@ use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\ThemeParkEvent;
 use App\Models\FerryTrip;
+use App\Models\Ad;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 0. Create Admin User
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('password123'),
-            'role' => 'admin'
-        ]);
+        // 0. Create Admin & Staff Users
+        $users = [
+            ['name' => 'Admin User', 'email' => 'admin@hotel.com', 'role' => 'admin'],
+            ['name' => 'Hotel Manager', 'email' => 'manager@hotel.com', 'role' => 'hotel_manager'],
+            ['name' => 'Ferry Staff', 'email' => 'ferry@hotel.com', 'role' => 'ferry_staff'],
+            ['name' => 'Theme Park Staff', 'email' => 'park@hotel.com', 'role' => 'theme_park_staff'],
+            ['name' => 'Regular User', 'email' => 'user@email.com', 'role' => 'visitor'], // "user" = "visitor"
+        ];
+
+        foreach ($users as $u) {
+            User::create([
+                'name' => $u['name'],
+                'email' => $u['email'],
+                'password' => Hash::make('1234'),
+                'role' => $u['role']
+            ]);
+        }
 
         // 1. Create Hotels
         $ocean = Hotel::create(['name' => 'Ocean View Resort']);
         $jungle = Hotel::create(['name' => 'Jungle Stay']);
         $city = Hotel::create(['name' => 'City Center Hotel']);
 
-        // 2. Create Rooms for each hotel with room numbers
+        // 2. Rooms
         $roomTypes = [
             'Single' => 100,
             'Couple' => 180,
@@ -36,18 +47,18 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ([$ocean, $jungle, $city] as $hotel) {
-            $roomNumber = 1; // reset per hotel
+            $roomNumber = 1;
             foreach ($roomTypes as $type => $price) {
                 Room::create([
                     'hotel_id' => $hotel->id,
-                    'type' => $type,       // exact match to ENUM
+                    'type' => $type,
                     'price' => $price,
                     'room_number' => $roomNumber++
                 ]);
             }
         }
 
-        // 3. Create Theme Park Events
+        // 3. Theme Park Events
         ThemeParkEvent::create([
             'name' => 'Dolphin Show',
             'description' => 'Amazing acrobatics with dolphins',
@@ -66,7 +77,7 @@ class DatabaseSeeder extends Seeder
             'price' => 10
         ]);
 
-        // 4. Create Ferry Trips
+        // 4. Ferry Trips
         FerryTrip::create([
             'route_name' => 'Harbor → Island',
             'departure_time' => now()->addDays(1)->setTime(10, 0),
@@ -89,6 +100,19 @@ class DatabaseSeeder extends Seeder
             'route_name' => 'Lagoon → Harbor',
             'departure_time' => now()->addDays(2)->setTime(15, 30),
             'capacity' => 30
+        ]);
+
+        // 5. Create Ads
+        Ad::create([
+            'title' => 'Dolphin Show – Don’t Miss Out!',
+            'content' => 'Join us for an unforgettable Dolphin Show featuring incredible tricks and close-up experiences. Limited seats available!',
+            'image_url' => 'https://images.pexels.com/photos/225869/pexels-photo-225869.jpeg'
+        ]);
+
+        Ad::create([
+            'title' => 'Night Fireworks – Special Event',
+            'content' => 'Experience our spectacular Night Fireworks event! A stunning showcase of lights, colors, and music for the whole family.',
+            'image_url' => null
         ]);
     }
 }
