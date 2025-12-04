@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Hotel Manager', 'email' => 'manager@hotel.com', 'role' => 'hotel_manager'],
             ['name' => 'Ferry Staff', 'email' => 'ferry@hotel.com', 'role' => 'ferry_staff'],
             ['name' => 'Theme Park Staff', 'email' => 'park@hotel.com', 'role' => 'theme_park_staff'],
-            ['name' => 'Regular User', 'email' => 'user@email.com', 'role' => 'visitor'], // "user" = "visitor"
+            ['name' => 'Regular User', 'email' => 'user@email.com', 'role' => 'visitor'],
         ];
 
         foreach ($users as $u) {
