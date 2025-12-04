@@ -3,15 +3,25 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\ThemeParkEvent;
-use App\Models\FerryTrip; // Make sure this exists
+use App\Models\FerryTrip;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Create Admin User
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('password123'),
+            'role' => 'admin'
+        ]);
+
         // 1. Create Hotels
         $ocean = Hotel::create(['name' => 'Ocean View Resort']);
         $jungle = Hotel::create(['name' => 'Jungle Stay']);
