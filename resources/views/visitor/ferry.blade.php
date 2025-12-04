@@ -207,7 +207,7 @@
         @if($eligibleBooking)
             <div class="card eligible-card">
                 <h3>Book Ferry Transfer</h3>
-                <p>✅ You are eligible (Booking at: <strong>{{ $eligibleBooking->hotel->name }}</strong>)</p>
+                <p>You are eligible (Booking at: <strong>{{ $eligibleBooking->hotel->name }}</strong>)</p>
                 
                 <form action="/ferry" method="POST">
                     @csrf
