@@ -19,7 +19,7 @@ Follow these steps to set up the project locally:
 ### 1. Clone or Download the Repository
 
 ```bash
-cd "themepark-system-main"
+cd "themepark-system"
 ```
 
 ### 2. Install PHP Dependencies
