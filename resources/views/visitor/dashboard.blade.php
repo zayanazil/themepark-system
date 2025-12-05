@@ -41,7 +41,6 @@
 
     <div class="dashboard-grid">
 
-        <!-- LEFT COLUMN: PURCHASES -->
         <div>
             <div class="section">
                 <h2>
@@ -49,7 +48,6 @@
                     My Activity & Purchases
                 </h2>
 
-                <!-- 1. HOTELS -->
                 <div class="card">
                     <h3>
                         <i data-lucide="hotel"></i>
@@ -61,13 +59,16 @@
                         <table>
                             <tr>
                                 <th>Hotel</th>
-                                <th>Room</th>
+                                <th>Price</th> <th>Room</th>
                                 <th>Dates</th>
                                 <th>Status</th>
                             </tr>
                             @foreach($myHotelBookings as $booking)
                             <tr>
                                 <td>{{ $booking->hotel->name }}</td>
+                                <td style="font-weight: 500; color: #2ecc71;">
+                                    ${{ number_format($booking->total_price, 2) }}
+                                </td>
                                 <td>{{ $booking->room_type }}</td>
                                 <td>{{ $booking->check_in }}<br>to {{ $booking->check_out }}</td>
                                 <td class="status-{{ $booking->status }}">{{ ucfirst($booking->status) }}</td>
@@ -77,7 +78,6 @@
                     @endif
                 </div>
 
-                <!-- 2. FERRY -->
                 <div class="card">
                     <h3>
                         <i data-lucide="ship"></i>
@@ -103,7 +103,6 @@
                     @endif
                 </div>
 
-                <!-- 3. EVENTS -->
                 <div class="card">
                     <h3>
                         <i data-lucide="ticket"></i>
@@ -124,7 +123,7 @@
                                 <td>{{ $booking->event->name }}</td>
                                 <td>{{ $booking->event->event_date }}</td>
                                 <td>{{ $booking->tickets }}</td>
-                                <td>${{ $booking->total_price }}</td>
+                                <td>${{ number_format($booking->total_price, 2) }}</td>
                             </tr>
                             @endforeach
                         </table>
@@ -133,7 +132,6 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: ADS & MAP -->
         <div>
             <div class="section">
                 <h3>
@@ -163,9 +161,7 @@
                     Map Points
                 </h3>
                 <div class="card">
-                    <!-- ADD MAP HERE -->
                     <div id="map" style="height: 400px; border-radius: 8px; margin-bottom: 16px;"></div>
-                    <!-- Keep the list below the map (optional) -->
                     @foreach($locations as $loc)
                         <div class="location-item">
                             <div class="location-name">{{ $loc->name }}</div>
@@ -190,9 +186,16 @@
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap, © CartoDB',
-            minZoom: 14, // prevent users zooming out too much (delete if issue) | ideally would be 15, 14 for mobile support
+            minZoom: 14,
             maxZoom: 19
         }).addTo(map);
+
+        // Add pins from database
+        @foreach($locations as $loc)
+            L.marker([{{ $loc->latitude }}, {{ $loc->longitude }}])
+                .addTo(map)
+                .bindPopup("<b>{{ $loc->name }}</b><br>{{ $loc->description }}");
+        @endforeach
     </script>
 
 </body>
