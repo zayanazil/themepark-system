@@ -33,63 +33,51 @@ class HotelController extends Controller
         $request->validate([
             'hotel_id' => 'required',
             'room_type' => 'required',
+            'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
             'guests' => 'required|integer|min:1'
         ]);
-
-        // B. Find a room of this type to get the price
-        $room = Room::where('hotel_id', $request->hotel_id)
-                    ->where('type', $request->room_type)
-                    ->first();
-
-        if (!$room) {
-            return back()->with('error', 'Sorry, this hotel does not have rooms of that type available.');
+    
+        // B. Get the specific room
+        $room = Room::findOrFail($request->room_id);
+    
+        // C. Verify the room matches the selected type
+        if ($room->type !== $request->room_type) {
+            return back()->with('error', 'Invalid room selection.');
         }
-
-        // C. Check how many rooms of this type exist
-        $totalRoomsOfType = Room::where('hotel_id', $request->hotel_id)
-                                ->where('type', $request->room_type)
-                                ->count();
-
-        // D. Check how many are already booked for these dates
-        $bookedRoomsCount = HotelBooking::where('hotel_id', $request->hotel_id)
-            ->where('room_type', $request->room_type)
+    
+        // D. Double-check this room is actually available for these dates
+        $isBooked = HotelBooking::where('room_id', $room->id)
             ->where('status', 'confirmed')
-            ->where(function($query) use ($request) {
-                // Any overlap: existing check_in is before new check_out AND existing check_out is after new check_in
-                $query->where('check_in', '<', $request->check_out)
-                      ->where('check_out', '>', $request->check_in);
-            })
-            ->count();
-
-        // E. Check if rooms are available
-        if ($bookedRoomsCount >= $totalRoomsOfType) {
-            return back()->with('error', 'Sorry, no rooms of this type are available for the selected dates. Please choose different dates.');
+            ->where('check_in', '<', $request->check_out)
+            ->where('check_out', '>', $request->check_in)
+            ->exists();
+    
+        if ($isBooked) {
+            return back()->with('error', 'Sorry, this room was just booked. Please select another room.');
         }
-
-        // F. Calculate Nights & Total Price
+    
+        // E. Calculate Nights & Total Price
         $checkIn = Carbon::parse($request->check_in);
         $checkOut = Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
-
-        // Safety check: ensure at least 1 night
         if ($nights < 1) $nights = 1;
-
         $totalPrice = $room->price * $nights;
-
-        // G. Create Booking
+    
+        // F. Create Booking
         HotelBooking::create([
             'user_id' => Auth::id(),
             'hotel_id' => $request->hotel_id,
-            'room_type' => $request->room_type,
+            'room_id' => $room->id,
+            'room_type' => $room->type,
             'check_in' => $request->check_in,
             'check_out' => $request->check_out,
             'guests' => $request->guests,
             'total_price' => $totalPrice,
             'status' => 'confirmed'
         ]);
-
-        return back()->with('success', "Room booked successfully! Total Cost: $" . number_format($totalPrice, 2));
+    
+        return redirect('/hotels')->with('success', "Room #{$room->id} ({$room->type}) booked successfully! Total Cost: $" . number_format($totalPrice, 2));
     }
 }

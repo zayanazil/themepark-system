@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,81 +10,111 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminHotelController extends Controller
 {
-    // 1. SELECTION SCREEN (Dropdown)
+    // 1. MAIN DASHBOARD (Shows all hotels and management)
     public function index()
     {
-        $hotels = Hotel::all();
-        return view('staff.select_hotel', compact('hotels'));
+        $hotels = Hotel::with('rooms')->get();
+        $allBookings = HotelBooking::with(['user', 'hotel', 'room'])->latest()->get();
+        $promotions = HotelPromotion::with('hotel')->latest()->get();
+        
+        return view('staff.hotel_manager', compact('hotels', 'allBookings', 'promotions'));
     }
 
-    // Process the dropdown selection
-    public function handleSelection(Request $request)
+    // 2. CREATE HOTEL (Admin Only)
+    public function store(Request $request) 
     {
-        $request->validate(['hotel_id' => 'required']);
-        return redirect('/manage/hotel/' . $request->hotel_id);
-    }
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
 
-    // 2. MAIN DASHBOARD (For a specific hotel)
-    public function showDashboard($id)
-    {
-        $hotel = Hotel::with('rooms')->findOrFail($id);
+        $request->validate([
+            'name' => 'required|string|max:255|unique:hotels,name'
+        ]);
 
-        $bookings = HotelBooking::where('hotel_id', $id)
-                        ->with(['user'])
-                        ->latest()
-                        ->get();
+        Hotel::create([
+            'name' => $request->name
+        ]);
 
-        $promotions = HotelPromotion::where('hotel_id', $id)->get();
-
-        return view('staff.hotel_dashboard', compact('hotel', 'bookings', 'promotions'));
+        return back()->with('success', 'Hotel created successfully!');
     }
 
     // 3. ADD INDIVIDUAL ROOM
-    public function storeRoom(Request $request)
+    public function addRoom(Request $request)
     {
-        $data = $request->validate([
-            'hotel_id' => 'required',
-            'room_number' => 'required', // e.g. "101"
-            'type' => 'required|in:Single,Couple,Family,Deluxe',
-            'price' => 'required|numeric'
+        $request->validate([
+            'hotel_id' => 'required|exists:hotels,id',
+            'type' => 'required|string|in:Single,Double,Deluxe,Suite,Family',
+            'price' => 'required|numeric|min:0'
         ]);
 
-        Room::create($data);
-        return back()->with('success', 'Room added successfully');
+        Room::create([
+            'hotel_id' => $request->hotel_id,
+            'type' => $request->type,
+            'price' => $request->price
+        ]);
+
+        return back()->with('success', 'Room added successfully!');
     }
 
-    // 4. BOOKING MANAGEMENT
-    public function editBooking($id)
+    // 4. DELETE ROOM
+    public function deleteRoom(Room $room)
     {
-        $booking = HotelBooking::with('hotel')->findOrFail($id);
-        return view('staff.edit_booking', compact('booking'));
+        // Check if room has any confirmed bookings
+        $hasActiveBookings = HotelBooking::where('room_id', $room->id)
+            ->where('status', 'confirmed')
+            ->where('check_out', '>=', now())
+            ->exists();
+
+        if ($hasActiveBookings) {
+            return back()->with('error', 'Cannot delete room with active bookings.');
+        }
+
+        $room->delete();
+        return back()->with('success', 'Room deleted successfully!');
     }
 
+    // 5. UPDATE BOOKING STATUS
     public function updateBooking(Request $request, $id)
     {
         $booking = HotelBooking::findOrFail($id);
-
+        
         $request->validate([
-            'check_in' => 'required|date',
-            'check_out' => 'required|date|after:check_in',
-            'room_type' => 'required|in:Single,Couple,Family,Deluxe', // Updated
-            'status' => 'required'
+            'status' => 'required|in:pending,confirmed,cancelled'
         ]);
 
         $booking->update([
-            'check_in' => $request->check_in,
-            'check_out' => $request->check_out,
-            'room_type' => $request->room_type,
             'status' => $request->status
         ]);
 
-        return redirect('/manage/hotel/'.$booking->hotel_id)->with('success', 'Booking updated successfully');
+        return back()->with('success', 'Booking status updated successfully!');
     }
 
-    // Admin Only: Create Hotel
-    public function store(Request $request) {
-        if (Auth::user()->role !== 'admin') abort(403);
-        Hotel::create($request->validate(['name'=>'required', 'room_count'=>'nullable'])); // room_count dummy
-        return back()->with('success', 'Hotel created');
+    // 6. CREATE PROMOTION
+    public function storePromotion(Request $request)
+    {
+        $request->validate([
+            'hotel_id' => 'required|exists:hotels,id',
+            'title' => 'required|string|max:255',
+            'discount_percent' => 'required|string|max:50',
+            'description' => 'nullable|string'
+        ]);
+
+        HotelPromotion::create([
+            'hotel_id' => $request->hotel_id,
+            'title' => $request->title,
+            'discount_percent' => $request->discount_percent,
+            'description' => $request->description
+        ]);
+
+        return back()->with('success', 'Promotion created successfully!');
+    }
+
+    // 7. DELETE PROMOTION
+    public function deletePromotion($id)
+    {
+        $promotion = HotelPromotion::findOrFail($id);
+        $promotion->delete();
+
+        return back()->with('success', 'Promotion deleted successfully!');
     }
 }

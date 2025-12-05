@@ -53,7 +53,6 @@ class DatabaseSeeder extends Seeder
                     'hotel_id' => $hotel->id,
                     'type' => $type,
                     'price' => $price,
-                    'room_number' => $roomNumber++
                 ]);
             }
         }

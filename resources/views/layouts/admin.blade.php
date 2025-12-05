@@ -45,7 +45,7 @@
             @endif
 
             @if(auth()->user()->role === 'admin' || auth()->user()->role === 'hotel_manager')
-                <a href="/hotel/selection">🏨 Hotel Selection</a>
+                <a href="/manage/hotels">🏨 Hotel Selection</a>
             @endif
 
             @if(auth()->user()->role === 'admin' || auth()->user()->role === 'ferry_staff')

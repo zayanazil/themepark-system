@@ -18,7 +18,6 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hotel_id')->constrained()->onDelete('cascade');
-            $table->string('room_number'); // e.g. "101"
             $table->enum('type', ['Single', 'Couple', 'Family', 'Deluxe']);
             $table->decimal('price', 8, 2);
             $table->boolean('is_available')->default(true); // For maintenance

@@ -25,7 +25,7 @@ Route::get('/', function () {
 
     return match($role) {
         'admin' => redirect('/admin/dashboard'),
-        'hotel_manager' => redirect('/hotel/selection'), // <--- FIXED: Points to Selection Menu now
+        'hotel_manager' => redirect('/manage/hotels'),
         'ferry_staff' => redirect('/ferry/dashboard'),
         'theme_park_staff' => redirect('/themepark/dashboard'),
         default => redirect('/visitor/dashboard'),
@@ -54,28 +54,26 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('manage/users', UserAdminController::class);
     Route::resource('manage/ads', AdController::class);
     Route::resource('manage/map', MapController::class);
-
-    // Admin access to Hotel Infrastructure
-    Route::post('/manage/hotels', [AdminHotelController::class, 'store']);
-    Route::delete('/manage/hotels/{id}', [AdminHotelController::class, 'destroy']);
 });
 
-// Hotel Manager
-Route::middleware(['auth', 'role:hotel_manager'])->group(function () {
-    Route::get('/hotel/selection', [AdminHotelController::class, 'index'])->name('hotel.select');
-
-    // NEW: Handle Dropdown Submit
-    Route::post('/hotel/select', [AdminHotelController::class, 'handleSelection']);
-
-    Route::get('/manage/hotel/{id}', [AdminHotelController::class, 'showDashboard']);
-    Route::post('/manage/rooms', [AdminHotelController::class, 'storeRoom']); // New Route
-
-    Route::post('/manage/hotels', [AdminHotelController::class, 'store']); // Admin add hotel
-
-    // ... bookings and promos routes ...
-    Route::get('/manage/booking/{id}/edit', [AdminHotelController::class, 'editBooking']);
-    Route::put('/manage/booking/{id}', [AdminHotelController::class, 'updateBooking']);
+// Hotel Manager (and Admin can access these too)
+Route::middleware(['auth'])->group(function () {
+    // Main hotel management dashboard
+    Route::get('/manage/hotels', [AdminHotelController::class, 'index']);
+    
+    // Create hotel (admin only - checked in controller)
+    Route::post('/manage/hotels', [AdminHotelController::class, 'store']);
+    
+    // Room management
+    Route::post('/manage/rooms', [AdminHotelController::class, 'addRoom']);
+    Route::delete('/manage/rooms/{room}', [AdminHotelController::class, 'deleteRoom']);
+    
+    // Booking management
+    Route::put('/manage/bookings/{id}', [AdminHotelController::class, 'updateBooking']);
+    
+    // Promotions
     Route::post('/manage/promotions', [AdminHotelController::class, 'storePromotion']);
+    Route::delete('/manage/promotions/{id}', [AdminHotelController::class, 'deletePromotion']);
 });
 
 // Ferry Staff
@@ -86,7 +84,7 @@ Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
     Route::post('/ferry/trips', [AdminFerryController::class, 'storeTrip']);
     Route::delete('/ferry/trips/{id}', [AdminFerryController::class, 'deleteTrip']);
     Route::post('/ferry/tickets', [AdminFerryController::class, 'storeTicket']);
-    Route::put('/ferry/tickets/{id}', [AdminFerryController::class, 'updateStatus']);
+    Route::put('/ferry/tickets/{id}', [AdminFerryController::class, 'updateTicketStatus']);
 });
 
 // Theme Park Staff
@@ -94,7 +92,7 @@ Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
     Route::get('/themepark/dashboard', [AdminEventController::class, 'index']);
     Route::resource('manage/events', AdminEventController::class);
 
-    // NEW ROUTES
+    // Additional routes
     Route::post('/themepark/sell', [AdminEventController::class, 'manualSale']);
     Route::post('/themepark/validate', [AdminEventController::class, 'validateTicket']);
     Route::post('/themepark/promote', [AdminEventController::class, 'storePromotion']);
