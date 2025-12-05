@@ -26,7 +26,7 @@ return new class extends Migration
 
     Schema::create('ferry_tickets', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained();
+        $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         // Link to the specific boat trip
         $table->foreignId('ferry_trip_id')->constrained()->onDelete('cascade');
         // Still need to link to hotel booking for validation
