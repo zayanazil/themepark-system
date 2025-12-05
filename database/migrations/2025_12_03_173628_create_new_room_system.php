@@ -28,7 +28,7 @@ return new class extends Migration
         // 3. Re-create Bookings Table (Updated to use String Type)
         Schema::create('hotel_bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('hotel_id')->constrained();
             $table->string('room_type'); // We store "Single", "Deluxe", etc.
             $table->date('check_in');
