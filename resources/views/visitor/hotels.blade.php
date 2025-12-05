@@ -62,13 +62,13 @@
                 @endphp
                 
                 @if($availableRooms->count() > 0)
-                    <form action="/book-hotel" method="POST" class="booking-form" style="margin-top: 20px;">
+                    <form action="/book-hotel" method="POST" class="booking-form" style="margin-top: 20px;" onsubmit="return confirm('Are you sure you want to book this room?');">
                         @csrf
                         <input type="hidden" name="hotel_id" value="{{ $hotel->id }}">
                         <input type="hidden" name="check_in" value="{{ request('check_in') }}">
                         <input type="hidden" name="check_out" value="{{ request('check_out') }}">
                         <input type="hidden" name="guests" value="{{ request('guests') }}">
-                                
+
                         <h3 style="margin-bottom: 16px;">Available Room Types</h3>
                         <div class="room-grid">
                             @foreach($availableRooms as $type => $rooms)
@@ -86,17 +86,17 @@
                                 </div>
                             @endforeach
                         </div>
-                                
+
                         <div class="form-group" id="room-number-section" style="display: none; margin-top: 20px;">
                             <label>Select Room Number</label>
                             <select name="room_id" id="room-number-select" required>
                                 <option value="">Choose a room number</option>
                             </select>
                         </div>
-                                
+
                         <button type="submit" id="submit-button" disabled>Book Now</button>
                     </form>
-                                
+
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
                             const roomTypeRadios = document.querySelectorAll('input[name="room_type"]');
@@ -109,7 +109,7 @@
                                     if (this.checked) {
                                         // Get available room IDs for this type
                                         const roomIds = this.dataset.rooms.split(',');
-                                        
+
                                         // Clear and populate dropdown
                                         roomNumberSelect.innerHTML = '<option value="">Choose a room number</option>';
                                         roomIds.forEach(roomId => {
@@ -122,7 +122,7 @@
                                         // Show the dropdown section
                                         roomNumberSection.style.display = 'block';
                                         roomNumberSelect.required = true;
-                                        
+
                                         // Disable submit until room is selected
                                         submitButton.disabled = true;
                                     }
