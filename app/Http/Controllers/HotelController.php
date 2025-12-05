@@ -33,7 +33,7 @@ class HotelController extends Controller
         $request->validate([
             'hotel_id' => 'required',
             'room_type' => 'required',
-            'check_in' => 'required|date',
+            'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
             'guests' => 'required|integer|min:1'
         ]);
@@ -47,7 +47,28 @@ class HotelController extends Controller
             return back()->with('error', 'Sorry, this hotel does not have rooms of that type available.');
         }
 
-        // C. Calculate Nights & Total Price
+        // C. Check how many rooms of this type exist
+        $totalRoomsOfType = Room::where('hotel_id', $request->hotel_id)
+                                ->where('type', $request->room_type)
+                                ->count();
+
+        // D. Check how many are already booked for these dates
+        $bookedRoomsCount = HotelBooking::where('hotel_id', $request->hotel_id)
+            ->where('room_type', $request->room_type)
+            ->where('status', 'confirmed')
+            ->where(function($query) use ($request) {
+                // Any overlap: existing check_in is before new check_out AND existing check_out is after new check_in
+                $query->where('check_in', '<', $request->check_out)
+                      ->where('check_out', '>', $request->check_in);
+            })
+            ->count();
+
+        // E. Check if rooms are available
+        if ($bookedRoomsCount >= $totalRoomsOfType) {
+            return back()->with('error', 'Sorry, no rooms of this type are available for the selected dates. Please choose different dates.');
+        }
+
+        // F. Calculate Nights & Total Price
         $checkIn = Carbon::parse($request->check_in);
         $checkOut = Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
@@ -57,7 +78,7 @@ class HotelController extends Controller
 
         $totalPrice = $room->price * $nights;
 
-        // D. Create Booking
+        // G. Create Booking
         HotelBooking::create([
             'user_id' => Auth::id(),
             'hotel_id' => $request->hotel_id,
@@ -65,10 +86,10 @@ class HotelController extends Controller
             'check_in' => $request->check_in,
             'check_out' => $request->check_out,
             'guests' => $request->guests,
-            'total_price' => $totalPrice, // Save calculated price for Analytics
+            'total_price' => $totalPrice,
             'status' => 'confirmed'
         ]);
 
-        return back()->with('success', "Room booked successfully! Total Cost: $" . number_format($totalPrice));
+        return back()->with('success', "Room booked successfully! Total Cost: $" . number_format($totalPrice, 2));
     }
 }
