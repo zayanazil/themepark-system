@@ -28,4 +28,9 @@ class Hotel extends Model
             ->get()
             ->groupBy('type');
     }
+
+    public function promotion()
+    {
+        return $this->hasOne(HotelPromotion::class);
+    }
 }

@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Hotel;
 use App\Models\HotelBooking;
+use App\Models\HotelPromotion;
 use App\Models\Room;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,15 +14,15 @@ class HotelController extends Controller
     // 1. Show Hotels Page to Visitor
     public function index()
     {
-        // Get hotels with rooms to display options
-        $hotels = Hotel::with('rooms')->get();
-
+        // Get hotels with rooms and active promotions
+        $hotels = Hotel::with(['rooms', 'promotion'])->get();
+        
         // Get user's purchase history
         $myBookings = HotelBooking::where('user_id', Auth::id())
                         ->with('hotel')
                         ->latest()
                         ->get();
-
+        
         return view('visitor.hotels', compact('hotels', 'myBookings'));
     }
 
@@ -68,7 +68,20 @@ class HotelController extends Controller
         $checkOut = Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
         if ($nights < 1) $nights = 1;
-        $totalPrice = $room->price * $nights;
+        
+        $basePrice = $room->price * $nights;
+        $totalPrice = $basePrice;
+        $discount = 0;
+        $promotion = null;
+
+        // Check if hotel has active promotion
+        $promotion = HotelPromotion::where('hotel_id', $request->hotel_id)->first();
+        
+        if ($promotion) {
+            $discountAmount = $basePrice * ($promotion->discount_value / 100);
+            $totalPrice = $basePrice - $discountAmount;
+            $discount = $promotion->discount_value;
+        }
     
         // G. Create Booking
         HotelBooking::create([
@@ -82,7 +95,16 @@ class HotelController extends Controller
             'total_price' => $totalPrice,
             'status' => 'confirmed'
         ]);
+
+        // Build success message with discount info
+        $message = "Room #{$room->id} ({$room->type}) booked successfully!";
+        
+        if ($promotion) {
+            $message .= " 🎉 {$promotion->title}: {$discount}% discount applied! Original: $" . number_format($basePrice, 2) . " → Final: $" . number_format($totalPrice, 2);
+        } else {
+            $message .= " Total Cost: $" . number_format($totalPrice, 2);
+        }
     
-        return redirect('/hotels')->with('success', "Room #{$room->id} ({$room->type}) booked successfully! Total Cost: $" . number_format($totalPrice, 2));
+        return redirect('/hotels')->with('success', $message);
     }
 }

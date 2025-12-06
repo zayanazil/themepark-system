@@ -97,17 +97,24 @@ class AdminHotelController extends Controller
         $request->validate([
             'hotel_id' => 'required|exists:hotels,id',
             'title' => 'required|string|max:255',
-            'discount_percent' => 'required|string|max:50',
+            'discount_percent' => 'required|integer|min:1|max:100',
             'description' => 'nullable|string'
         ]);
-
+    
+        // Check if hotel already has an active promotion
+        $existingPromo = HotelPromotion::where('hotel_id', $request->hotel_id)->first();
+        
+        if ($existingPromo) {
+            return back()->with('error', 'This hotel already has an active promotion. Please remove it first.');
+        }
+    
         HotelPromotion::create([
             'hotel_id' => $request->hotel_id,
             'title' => $request->title,
-            'discount_percent' => $request->discount_percent,
+            'discount_percent' => $request->discount_percent . '%',
             'description' => $request->description
         ]);
-
+    
         return back()->with('success', 'Promotion created successfully!');
     }
 

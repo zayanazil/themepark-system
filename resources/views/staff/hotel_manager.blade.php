@@ -179,19 +179,25 @@
                 @csrf
                 <label>Select Hotel:</label><br>
                 <select name="hotel_id" style="width:100%" required>
+                    <option value="">Choose hotel...</option>
                     @foreach($hotels as $hotel)
-                        <option value="{{ $hotel->id }}">{{ $hotel->name }}</option>
+                        @php
+                            $hasPromo = $promotions->where('hotel_id', $hotel->id)->first();
+                        @endphp
+                        <option value="{{ $hotel->id }}" {{ $hasPromo ? 'disabled' : '' }}>
+                            {{ $hotel->name }} {{ $hasPromo ? '(Has Active Promo)' : '' }}
+                        </option>
                     @endforeach
                 </select><br>
 
                 <label>Title:</label><br>
                 <input type="text" name="title" placeholder="e.g. Summer Sale" required style="width:100%"><br>
 
-                <label>Discount:</label><br>
-                <input type="text" name="discount_percent" placeholder="e.g. 15% OFF" required style="width:100%"><br>
+                <label>Discount Percentage:</label><br>
+                <input type="number" name="discount_percent" placeholder="e.g. 15" required min="1" max="100" style="width:100%"><br>
 
                 <label>Description:</label><br>
-                <textarea name="description" rows="3" style="width:100%"></textarea><br>
+                <textarea name="description" rows="3" placeholder="Describe the offer..." style="width:100%"></textarea><br>
 
                 <button class="btn btn-green" style="width:100%">Post Offer</button>
             </form>
@@ -199,15 +205,32 @@
 
         <div>
             <h3>Active Promotions</h3>
-            <ul style="list-style: none; padding: 0;">
-                @foreach($promotions as $promo)
-                    <li style="margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                        <strong>{{ $promo->title }} ({{ $promo->discount_percent }})</strong><br>
-                        <small>at {{ $promo->hotel->name }}</small><br>
-                        {{ $promo->description }}
-                    </li>
-                @endforeach
-            </ul>
+            @if($promotions->count() > 0)
+                <ul style="list-style: none; padding: 0;">
+                    @foreach($promotions as $promo)
+                        <li style="margin-bottom: 15px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fff;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <strong style="font-size: 1.1em;">{{ $promo->title }}</strong>
+                                    <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.9em; margin-left: 10px;">
+                                        {{ $promo->discount_percent }} OFF
+                                    </span>
+                                    <br>
+                                    <small style="color: #666;">at {{ $promo->hotel->name }}</small>
+                                    <p style="margin: 8px 0 0 0; color: #333;">{{ $promo->description }}</p>
+                                </div>
+                                <form action="/manage/promotions/{{ $promo->id }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-red" onclick="return confirm('Remove this promotion?')">Remove</button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p style="color: #666;">No active promotions.</p>
+            @endif
         </div>
     </div>
 </div>

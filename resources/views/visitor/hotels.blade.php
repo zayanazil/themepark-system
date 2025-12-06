@@ -28,6 +28,16 @@
         <div class="hotel-card">
             <h2>{{ $hotel->name }}</h2>
 
+            @if($hotel->promotion)
+                <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #28a745;">
+                    <strong>{{ $hotel->promotion->title }}</strong>
+                    <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.9em; margin-left: 8px;">
+                        {{ $hotel->promotion->discount_percent }} OFF
+                    </span>
+                    <p style="margin: 4px 0 0 0;">{{ $hotel->promotion->description }}</p>
+                </div>
+            @endif
+
             <!-- Step 1: Date Selection Form -->
             <form method="GET" action="/hotels" class="date-check-form">
                 <input type="hidden" name="hotel_id" value="{{ $hotel->id }}">
@@ -66,21 +76,33 @@
 
                         <h3 style="margin-bottom: 16px;">Available Room Types</h3>
                         <div class="room-grid">
-                        @foreach($availableRooms as $type => $rooms)
-                            @php $firstRoom = $rooms->first(); @endphp
-                            <div class="room-option">
-                                <input type="radio" name="room_type" value="{{ $type }}" 
-                                       id="room_type_{{ $hotel->id }}_{{ $loop->index }}" 
-                                       data-rooms="{{ $rooms->pluck('id')->implode(',') }}"
-                                       data-capacity="{{ $firstRoom->capacity }}"
-                                       required>
-                                <label for="room_type_{{ $hotel->id }}_{{ $loop->index }}" class="room-label">
-                                    <div class="room-type">{{ $type }}</div>
-                                    <div class="room-price">${{ $firstRoom->price }} / night</div>
-                                    <div class="room-available">{{ $rooms->count() }} available • Max {{ $firstRoom->capacity }} guests</div>
-                                </label>
-                            </div>
-                        @endforeach
+                            @foreach($availableRooms as $type => $rooms)
+                                @php 
+                                    $firstRoom = $rooms->first();
+                                    $originalPrice = $firstRoom->price;
+                                    $discountedPrice = $hotel->promotion ? $hotel->promotion->applyDiscount($originalPrice) : $originalPrice;
+                                @endphp
+                                <div class="room-option">
+                                    <input type="radio" name="room_type" value="{{ $type }}" 
+                                           id="room_type_{{ $hotel->id }}_{{ $loop->index }}" 
+                                           data-rooms="{{ $rooms->pluck('id')->implode(',') }}"
+                                           data-capacity="{{ $firstRoom->capacity }}"
+                                           required>
+                                    <label for="room_type_{{ $hotel->id }}_{{ $loop->index }}" class="room-label">
+                                        <div class="room-type">{{ $type }}</div>
+                                        <div class="room-price">
+                                            @if($hotel->promotion)
+                                                <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${{ $originalPrice }}</span>
+                                                <span style="color: #28a745; font-weight: bold;">${{ number_format($discountedPrice, 2) }}</span>
+                                                / night
+                                            @else
+                                                ${{ $originalPrice }} / night
+                                            @endif
+                                        </div>
+                                        <div class="room-available">{{ $rooms->count() }} available • Max {{ $firstRoom->capacity }} guests</div>
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
 
                         <div class="form-group" id="room-number-section" style="display: none; margin-top: 20px;">
