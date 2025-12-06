@@ -84,17 +84,23 @@
                         </span>
                     </td>
                     <td>
-                        <form action="/manage/users/{{ $user->id }}" method="POST" style="display: flex; gap: 5px;">
-                            @csrf @method('PUT')
-                            <select name="role" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
-                                <option value="visitor" {{ $user->role == 'visitor' ? 'selected' : '' }}>Visitor</option>
-                                <option value="hotel_manager" {{ $user->role == 'hotel_manager' ? 'selected' : '' }}>Hotel Manager</option>
-                                <option value="ferry_staff" {{ $user->role == 'ferry_staff' ? 'selected' : '' }}>Ferry Staff</option>
-                                <option value="theme_park_staff" {{ $user->role == 'theme_park_staff' ? 'selected' : '' }}>Park Staff</option>
-                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                            </select>
-                            <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Save</button>
-                        </form>
+                        @if(auth()->id() === $user->id)
+                            <span style="color:#888; font-size: 0.9em;">
+                                (Cannot change your own role)
+                            </span>
+                        @else
+                            <form action="/manage/users/{{ $user->id }}" method="POST" style="display: flex; gap: 5px;">
+                                @csrf @method('PUT')
+                                <select name="role" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+                                    <option value="visitor" {{ $user->role == 'visitor' ? 'selected' : '' }}>Visitor</option>
+                                    <option value="hotel_manager" {{ $user->role == 'hotel_manager' ? 'selected' : '' }}>Hotel Manager</option>
+                                    <option value="ferry_staff" {{ $user->role == 'ferry_staff' ? 'selected' : '' }}>Ferry Staff</option>
+                                    <option value="theme_park_staff" {{ $user->role == 'theme_park_staff' ? 'selected' : '' }}>Park Staff</option>
+                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                </select>
+                                <button style="background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Save</button>
+                            </form>
+                        @endif
                     </td>
                     <td>
                         @if(auth()->id() !== $user->id)
