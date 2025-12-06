@@ -171,65 +171,93 @@
 
 <div class="section">
     <h2>🏷️ Promotional Offers</h2>
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+    
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 25px; margin-top: 15px;">
 
-        <div style="background: #f1f1f1; padding: 15px; border-radius: 5px;">
-            <h3>Create New Offer</h3>
-            <form action="/manage/promotions" method="POST">
+        <div class="hotel-block" style="box-sizing: border-box; overflow: hidden;">
+            <h3 style="margin-top: 0; color: #333;">Create New Offer</h3>
+            <form action="/manage/promotions" method="POST" style="width: 100%;">
                 @csrf
-                <label>Select Hotel:</label><br>
-                <select name="hotel_id" style="width:100%" required>
-                    <option value="">Choose hotel...</option>
-                    @foreach($hotels as $hotel)
-                        @php
-                            $hasPromo = $promotions->where('hotel_id', $hotel->id)->first();
-                        @endphp
-                        <option value="{{ $hotel->id }}" {{ $hasPromo ? 'disabled' : '' }}>
-                            {{ $hotel->name }} {{ $hasPromo ? '(Has Active Promo)' : '' }}
-                        </option>
-                    @endforeach
-                </select><br>
+                
+                <div style="margin-bottom: 15px; width: 100%;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Select Hotel:</label>
+                    <select name="hotel_id" required 
+                            style="width: 100%; max-width: 100%; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; box-sizing: border-box;">
+                        <option value="">Choose hotel...</option>
+                        @foreach($hotels as $hotel)
+                            @php
+                                $hasPromo = $promotions->where('hotel_id', $hotel->id)->first();
+                            @endphp
+                            <option value="{{ $hotel->id }}" {{ $hasPromo ? 'disabled' : '' }}>
+                                {{ $hotel->name }} {{ $hasPromo ? '(Has Active Promo)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-                <label>Title:</label><br>
-                <input type="text" name="title" placeholder="e.g. Summer Sale" required style="width:100%"><br>
+                <div style="margin-bottom: 15px; width: 100%;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Title:</label>
+                    <input type="text" name="title" placeholder="e.g. Summer Sale" required 
+                           style="width: 100%; max-width: 100%; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; box-sizing: border-box;">
+                </div>
 
-                <label>Discount Percentage:</label><br>
-                <input type="number" name="discount_percent" placeholder="e.g. 15" required min="1" max="100" style="width:100%"><br>
+                <div style="margin-bottom: 15px; width: 100%;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Discount Percentage:</label>
+                    <div style="display: flex; width: 100%;">
+                        <input type="number" name="discount_percent" placeholder="e.g. 15 (%)" required min="1" max="100" 
+                               style="width: 100%; max-width: 100%; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px 0 0 4px; box-sizing: border-box;">
+                    </div>
+                </div>
 
-                <label>Description:</label><br>
-                <textarea name="description" rows="3" placeholder="Describe the offer..." style="width:100%"></textarea><br>
+                <div style="margin-bottom: 20px; width: 100%;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Description:</label>
+                    <textarea name="description" rows="4" placeholder="Describe the offer..." 
+                              style="width: 100%; max-width: 100%; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; resize: vertical; box-sizing: border-box;"></textarea>
+                </div>
 
-                <button class="btn btn-green" style="width:100%">Post Offer</button>
+                <button class="btn btn-green" style="width: 100%; padding: 10px; font-size: 1em; box-sizing: border-box;">Post Offer</button>
             </form>
         </div>
 
         <div>
-            <h3>Active Promotions</h3>
+            <h3 style="margin-top: 0; color: #333; margin-bottom: 15px;">Active Promotions</h3>
             @if($promotions->count() > 0)
-                <ul style="list-style: none; padding: 0;">
+                <div style="display: flex; flex-direction: column; gap: 15px;">
                     @foreach($promotions as $promo)
-                        <li style="margin-bottom: 15px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fff;">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div>
-                                    <strong style="font-size: 1.1em;">{{ $promo->title }}</strong>
-                                    <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.9em; margin-left: 10px;">
-                                        {{ $promo->discount_percent }} OFF
-                                    </span>
-                                    <br>
-                                    <small style="color: #666;">at {{ $promo->hotel->name }}</small>
-                                    <p style="margin: 8px 0 0 0; color: #333;">{{ $promo->description }}</p>
+                        <div style="border: 1px solid #dee2e6; padding: 18px; border-radius: 6px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                        <strong style="font-size: 1.1em; color: #333;">{{ $promo->title }}</strong>
+                                        <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; margin-left: 12px; font-weight: 600;">
+                                            {{ $promo->discount_percent }}% OFF
+                                        </span>
+                                    </div>
+                                    <div style="color: #666; margin-bottom: 8px; font-size: 0.9em;">
+                                        🏨 {{ $promo->hotel->name }}
+                                    </div>
+                                    <p style="margin: 0; color: #333; line-height: 1.5;">{{ $promo->description }}</p>
                                 </div>
-                                <form action="/manage/promotions/{{ $promo->id }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-red" onclick="return confirm('Remove this promotion?')">Remove</button>
-                                </form>
+                                <div style="margin-left: 15px; flex-shrink: 0;">
+                                    <form action="/manage/promotions/{{ $promo->id }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-red" 
+                                                onclick="return confirm('Remove this promotion?')"
+                                                style="padding: 6px 12px; font-size: 0.9em;">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        </li>
+                        </div>
                     @endforeach
-                </ul>
+                </div>
             @else
-                <p style="color: #666;">No active promotions.</p>
+                <div style="text-align: center; padding: 40px; color: #666; background: #f8f9fa; border-radius: 6px; border: 1px dashed #dee2e6;">
+                    <p style="margin-bottom: 10px; font-size: 1.1em;">No active promotions yet</p>
+                    <p style="color: #888;">Create your first promotional offer using the form on the left.</p>
+                </div>
             @endif
         </div>
     </div>
