@@ -16,7 +16,7 @@ Before you begin, ensure you have the following installed on your system:
 
 Follow these steps to set up the project locally:
 
-### 1. Clone or Download the Repository
+### 1. Clone or Download the Repository & Navigate to the directory
 
 ```bash
 cd "themepark-system"
