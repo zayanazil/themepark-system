@@ -9,6 +9,9 @@ use App\Models\Room;
 use App\Models\ThemeParkEvent;
 use App\Models\FerryTrip;
 use App\Models\Ad;
+use App\Models\MapLocation;
+use App\models\HotelPromotion;
+use App\models\EventPromotion;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -79,6 +82,26 @@ class DatabaseSeeder extends Seeder
             'price' => 10
         ]);
 
+        ThemeParkEvent::create([
+            'name' => 'Volleyball',
+            'description' => 'Fun beach volleyball games for all ages',
+            'capacity' => 30,
+            'event_date' => '2025-12-21',
+            'event_time' => '11:00:00',
+            'price' => 15,
+            'category' => 'Beach Event', // specify the category
+        ]);
+
+        ThemeParkEvent::create([
+            'name' => 'Beach Fishing Challenge',
+            'description' => 'Compete to catch the biggest fish along the shore!',
+            'capacity' => 20,
+            'event_date' => '2025-12-22',
+            'event_time' => '09:00:00',
+            'price' => 20,
+            'category' => 'Beach Event',
+        ]);
+
         // 4. Ferry Trips
         FerryTrip::create([
             'route_name' => 'Harbor → Island',
@@ -111,12 +134,6 @@ class DatabaseSeeder extends Seeder
             'image_url' => 'https://images.pexels.com/photos/225869/pexels-photo-225869.jpeg'
         ]);
 
-        Ad::create([
-            'title' => 'Night Fireworks – Special Event',
-            'content' => 'Experience our spectacular Night Fireworks event! A stunning showcase of lights, colors, and music for the whole family.',
-            'image_url' => null
-        ]);
-
         // 6. Map Locations
         $locations = [
             ['name' => 'Beach', 'latitude' => 4.174315, 'longitude' => 73.518072],
@@ -128,7 +145,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($locations as $loc) {
-            \App\Models\MapLocation::create([
+            MapLocation::create([
                 'name' => $loc['name'],
                 'latitude' => $loc['latitude'],
                 'longitude' => $loc['longitude'],
@@ -136,11 +153,27 @@ class DatabaseSeeder extends Seeder
         }
 
         // 7. Promo
-        \App\Models\HotelPromotion::create([
+        HotelPromotion::create([
             'hotel_id' => $ocean->id,
             'title' => 'Seashell Savings',
             'discount_percent' => 5,
             'description' => 'Enjoy a special discount on your Ocean View stay!'
+        ]);
+
+        $event1 = ThemeParkEvent::where('name', 'Dolphin Show')->first();
+        EventPromotion::create([
+            'event_id' => $event1->id,
+            'title' => 'Holiday Special',
+            'discount_percent' => 20,
+            'description' => 'Get 20% off for a limited time!'
+        ]);
+
+        $event2 = ThemeParkEvent::where('name', 'Volleyball')->first();
+        EventPromotion::create([
+            'event_id' => $event2->id,
+            'title' => 'Beach Fun Offer',
+            'discount_percent' => 15,
+            'description' => 'Enjoy 15% off your volleyball entry!'
         ]);
     }
 }
