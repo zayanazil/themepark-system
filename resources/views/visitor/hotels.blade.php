@@ -43,10 +43,6 @@
                         <input type="date" name="check_out" required min="{{ date('Y-m-d') }}" 
                                value="{{ request('check_out') }}">
                     </div>
-                    <div class="date-group">
-                        <label>Guests</label>
-                        <input type="number" name="guests" value="{{ request('guests', 1) }}" min="1">
-                    </div>
                 </div>
 
                 <button type="submit">Check Availability</button>
@@ -67,24 +63,24 @@
                         <input type="hidden" name="hotel_id" value="{{ $hotel->id }}">
                         <input type="hidden" name="check_in" value="{{ request('check_in') }}">
                         <input type="hidden" name="check_out" value="{{ request('check_out') }}">
-                        <input type="hidden" name="guests" value="{{ request('guests') }}">
 
                         <h3 style="margin-bottom: 16px;">Available Room Types</h3>
                         <div class="room-grid">
-                            @foreach($availableRooms as $type => $rooms)
-                                @php $price = $rooms->first()->price; @endphp
-                                <div class="room-option">
-                                    <input type="radio" name="room_type" value="{{ $type }}" 
-                                           id="room_type_{{ $hotel->id }}_{{ $loop->index }}" 
-                                           data-rooms="{{ $rooms->pluck('id')->implode(',') }}"
-                                           required>
-                                    <label for="room_type_{{ $hotel->id }}_{{ $loop->index }}" class="room-label">
-                                        <div class="room-type">{{ $type }}</div>
-                                        <div class="room-price">${{ $price }} / night</div>
-                                        <div class="room-available">{{ $rooms->count() }} available</div>
-                                    </label>
-                                </div>
-                            @endforeach
+                        @foreach($availableRooms as $type => $rooms)
+                            @php $firstRoom = $rooms->first(); @endphp
+                            <div class="room-option">
+                                <input type="radio" name="room_type" value="{{ $type }}" 
+                                       id="room_type_{{ $hotel->id }}_{{ $loop->index }}" 
+                                       data-rooms="{{ $rooms->pluck('id')->implode(',') }}"
+                                       data-capacity="{{ $firstRoom->capacity }}"
+                                       required>
+                                <label for="room_type_{{ $hotel->id }}_{{ $loop->index }}" class="room-label">
+                                    <div class="room-type">{{ $type }}</div>
+                                    <div class="room-price">${{ $firstRoom->price }} / night</div>
+                                    <div class="room-available">{{ $rooms->count() }} available • Max {{ $firstRoom->capacity }} guests</div>
+                                </label>
+                            </div>
+                        @endforeach
                         </div>
 
                         <div class="form-group" id="room-number-section" style="display: none; margin-top: 20px;">
@@ -92,6 +88,14 @@
                             <select name="room_id" id="room-number-select" required>
                                 <option value="">Choose a room number</option>
                             </select>
+                        </div>
+
+                        <div class="form-group" id="guests-section" style="display: none; margin-top: 20px;">
+                            <label>Number of Guests</label>
+                            <input type="number" name="guests" id="guests-input" min="1" required>
+                            <p id="capacity-warning" style="color: #dc2626; font-size: 14px; margin-top: 8px; display: none;">
+                                This room can only accommodate <span id="max-capacity"></span> guests.
+                            </p>
                         </div>
 
                         <button type="submit" id="submit-button" disabled>Book Now</button>
@@ -102,15 +106,22 @@
                             const roomTypeRadios = document.querySelectorAll('input[name="room_type"]');
                             const roomNumberSection = document.getElementById('room-number-section');
                             const roomNumberSelect = document.getElementById('room-number-select');
+                            const guestsSection = document.getElementById('guests-section');
+                            const guestsInput = document.getElementById('guests-input');
                             const submitButton = document.getElementById('submit-button');
+                            const capacityWarning = document.getElementById('capacity-warning');
+                            const maxCapacitySpan = document.getElementById('max-capacity');
+
+                            let currentCapacity = 0;
                         
                             roomTypeRadios.forEach(radio => {
                                 radio.addEventListener('change', function() {
                                     if (this.checked) {
-                                        // Get available room IDs for this type
+                                        // Get available room IDs and capacity for this type
                                         const roomIds = this.dataset.rooms.split(',');
+                                        currentCapacity = parseInt(this.dataset.capacity);
 
-                                        // Clear and populate dropdown
+                                        // Clear and populate room dropdown
                                         roomNumberSelect.innerHTML = '<option value="">Choose a room number</option>';
                                         roomIds.forEach(roomId => {
                                             const option = document.createElement('option');
@@ -119,20 +130,52 @@
                                             roomNumberSelect.appendChild(option);
                                         });
                                     
-                                        // Show the dropdown section
+                                        // Show room number section
                                         roomNumberSection.style.display = 'block';
                                         roomNumberSelect.required = true;
 
-                                        // Disable submit until room is selected
+                                        // Hide guests section until room is selected
+                                        guestsSection.style.display = 'none';
+                                        guestsInput.value = '';
+                                        capacityWarning.style.display = 'none';
+
+                                        // Disable submit
                                         submitButton.disabled = true;
                                     }
                                 });
                             });
                         
                             roomNumberSelect.addEventListener('change', function() {
-                                // Enable submit button when room is selected
-                                submitButton.disabled = !this.value;
+                                if (this.value) {
+                                    // Show guests section
+                                    guestsSection.style.display = 'block';
+                                    guestsInput.max = currentCapacity;
+                                    guestsInput.value = 1;
+                                    maxCapacitySpan.textContent = currentCapacity;
+
+                                    // Validate on change
+                                    validateGuests();
+                                } else {
+                                    guestsSection.style.display = 'none';
+                                    submitButton.disabled = true;
+                                }
                             });
+
+                            guestsInput.addEventListener('input', validateGuests);
+
+                            function validateGuests() {
+                                const guests = parseInt(guestsInput.value);
+                                
+                                if (guests > currentCapacity) {
+                                    capacityWarning.style.display = 'block';
+                                    submitButton.disabled = true;
+                                } else if (guests >= 1) {
+                                    capacityWarning.style.display = 'none';
+                                    submitButton.disabled = false;
+                                } else {
+                                    submitButton.disabled = true;
+                                }
+                            }
                         });
                     </script>
                 @else
@@ -146,27 +189,30 @@
     </div>
 
     <script>
-        const forms = document.querySelectorAll('.booking-form');
+        // Date validation for check-in/check-out
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkInInputs = document.querySelectorAll('input[name="check_in"]');
+            
+            checkInInputs.forEach(checkInInput => {
+                const form = checkInInput.closest('form');
+                const checkOutInput = form.querySelector('input[name="check_out"]');
+                
+                checkInInput.addEventListener('change', function() {
+                    const checkInDate = this.value;
 
-        forms.forEach(form => {
-            const checkInInput = form.querySelector('.check-in');
-            const checkOutInput = form.querySelector('.check-out');
+                    if (checkInDate) {
+                        let date = new Date(checkInDate);
+                        date.setDate(date.getDate() + 1);
 
-            checkInInput.addEventListener('change', function() {
-                const checkInDate = this.value;
+                        const nextDay = date.toISOString().split('T')[0];
 
-                if (checkInDate) {
-                    let date = new Date(checkInDate);
-                    date.setDate(date.getDate() + 1);
+                        checkOutInput.min = nextDay;
 
-                    const nextDay = date.toISOString().split('T')[0];
-
-                    checkOutInput.min = nextDay;
-
-                    if (checkOutInput.value && checkOutInput.value < nextDay) {
-                        checkOutInput.value = nextDay;
+                        if (checkOutInput.value && checkOutInput.value < nextDay) {
+                            checkOutInput.value = nextDay;
+                        }
                     }
-                }
+                });
             });
         });
     </script>

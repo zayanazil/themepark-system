@@ -44,13 +44,15 @@ class AdminHotelController extends Controller
         $request->validate([
             'hotel_id' => 'required|exists:hotels,id',
             'type' => 'required|string|in:Single,Double,Deluxe,Suite,Family',
-            'price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0',
+            'capacity' => 'required|integer|min:1|max:10'
         ]);
 
         Room::create([
             'hotel_id' => $request->hotel_id,
             'type' => $request->type,
-            'price' => $request->price
+            'price' => $request->price,
+            'capacity' => $request->capacity
         ]);
 
         return back()->with('success', 'Room added successfully!');

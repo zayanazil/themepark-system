@@ -42,12 +42,17 @@ class HotelController extends Controller
         // B. Get the specific room
         $room = Room::findOrFail($request->room_id);
     
-        // C. Verify the room matches the selected type
+        // C. Check if number of guests exceeds room capacity
+        if ($request->guests > $room->capacity) {
+            return back()->with('error', "This room can only accommodate {$room->capacity} guests. Please select a different room or reduce the number of guests.");
+        }
+    
+        // D. Verify the room matches the selected type
         if ($room->type !== $request->room_type) {
             return back()->with('error', 'Invalid room selection.');
         }
     
-        // D. Double-check this room is actually available for these dates
+        // E. Double-check this room is actually available for these dates
         $isBooked = HotelBooking::where('room_id', $room->id)
             ->where('status', 'confirmed')
             ->where('check_in', '<', $request->check_out)
@@ -58,14 +63,14 @@ class HotelController extends Controller
             return back()->with('error', 'Sorry, this room was just booked. Please select another room.');
         }
     
-        // E. Calculate Nights & Total Price
+        // F. Calculate Nights & Total Price
         $checkIn = Carbon::parse($request->check_in);
         $checkOut = Carbon::parse($request->check_out);
         $nights = $checkIn->diffInDays($checkOut);
         if ($nights < 1) $nights = 1;
         $totalPrice = $room->price * $nights;
     
-        // F. Create Booking
+        // G. Create Booking
         HotelBooking::create([
             'user_id' => Auth::id(),
             'hotel_id' => $request->hotel_id,

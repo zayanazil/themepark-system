@@ -56,6 +56,7 @@
                 <tr>
                     <th>Room #</th>
                     <th>Type</th>
+                    <th>Capacity</th>
                     <th>Price/Night</th>
                     <th>Action</th>
                 </tr>
@@ -65,6 +66,7 @@
                 <tr>
                     <td>Room #{{ $room->id }}</td>
                     <td>{{ $room->type }}</td>
+                    <td>{{ $room->capacity }} guests</td>
                     <td>${{ $room->price }}</td>
                     <td>
                         <form action="/manage/rooms/{{ $room->id }}" method="POST" style="display:inline;">
@@ -95,6 +97,9 @@
                     <option value="Suite">Suite</option>
                     <option value="Family">Family</option>
                 </select><br>
+
+                <label>Capacity (Max Guests):</label><br>
+                <input type="number" name="capacity" placeholder="e.g. 2" required min="1" max="10" style="width: 200px;"><br>
 
                 <label>Price per Night:</label><br>
                 <input type="number" name="price" placeholder="e.g. 150" required min="0" step="0.01" style="width: 200px;"><br>
