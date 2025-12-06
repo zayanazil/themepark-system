@@ -106,25 +106,25 @@ class DatabaseSeeder extends Seeder
         FerryTrip::create([
             'route_name' => 'Harbor → Island',
             'departure_time' => now()->addDays(1)->setTime(10, 0),
-            'capacity' => 50
+            'capacity' => 15
         ]);
 
         FerryTrip::create([
             'route_name' => 'Island → Harbor',
             'departure_time' => now()->addDays(1)->setTime(16, 0),
-            'capacity' => 50
+            'capacity' => 15
         ]);
 
         FerryTrip::create([
             'route_name' => 'Harbor → Lagoon',
             'departure_time' => now()->addDays(2)->setTime(9, 30),
-            'capacity' => 30
+            'capacity' => 12
         ]);
 
         FerryTrip::create([
             'route_name' => 'Lagoon → Harbor',
             'departure_time' => now()->addDays(2)->setTime(15, 30),
-            'capacity' => 30
+            'capacity' => 12
         ]);
 
         // 5. Create Ads
