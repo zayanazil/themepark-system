@@ -54,9 +54,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('manage/users', UserAdminController::class);
     Route::resource('manage/ads', AdController::class);
 
-    Route::get('/manage/map', [MapController::class, 'index'])->name('map.index');
-    Route::post('/manage/map', [MapController::class, 'store'])->name('map.store');
-    Route::delete('/manage/map/{id}', [MapController::class, 'destroy'])->name('map.destroy');
+    Route::resource('manage/map', MapController::class);
 });
 
 // Hotel Manager (and Admin can access these too)
