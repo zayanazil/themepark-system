@@ -41,7 +41,7 @@
                         
                             <option value="{{ $trip->id }}" @if($remaining <= 0) disabled @endif>
                                 {{ $trip->route_name }} |
-                                {{ \Carbon\Carbon::parse($trip->departure_time)->format('M d, H:i A') }}
+                                {{ \Carbon\Carbon::parse($trip->departure_time)->format('Y-m-d\TH:i') }}
                                 @if($remaining > 0)
                                     ({{ $remaining }} seats left)
                                 @else
