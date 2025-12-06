@@ -85,7 +85,7 @@ Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
     Route::post('/ferry/trips', [AdminFerryController::class, 'storeTrip']);
     Route::delete('/ferry/trips/{id}', [AdminFerryController::class, 'deleteTrip']);
     Route::post('/ferry/tickets', [AdminFerryController::class, 'storeTicket']);
-    Route::put('/ferry/tickets/{id}', [AdminFerryController::class, 'updateTicketStatus']);
+    Route::put('/ferry/tickets/{id}', [AdminFerryController::class, 'updateStatus']);
 });
 
 // Theme Park Staff
