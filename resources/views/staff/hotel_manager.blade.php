@@ -94,7 +94,6 @@
                     <option value="Single">Single</option>
                     <option value="Double">Double</option>
                     <option value="Deluxe">Deluxe</option>
-                    <option value="Suite">Suite</option>
                     <option value="Family">Family</option>
                 </select><br>
 
