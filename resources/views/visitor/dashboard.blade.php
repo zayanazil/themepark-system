@@ -162,12 +162,6 @@
                 </h3>
                 <div class="card">
                     <div id="map" style="height: 400px; border-radius: 8px; margin-bottom: 16px;"></div>
-                    @foreach($locations as $loc)
-                        <div class="location-item">
-                            <div class="location-name">{{ $loc->name }}</div>
-                            <div class="location-description">{{ $loc->description }}</div>
-                        </div>
-                    @endforeach
                 </div>
             </div>
         </div>

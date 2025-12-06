@@ -113,5 +113,23 @@ class DatabaseSeeder extends Seeder
             'content' => 'Experience our spectacular Night Fireworks event! A stunning showcase of lights, colors, and music for the whole family.',
             'image_url' => null
         ]);
+
+        // 6. Map Locations
+        $locations = [
+            ['name' => 'Beach', 'latitude' => 4.174315, 'longitude' => 73.518072],
+            ['name' => 'Dolphin Show', 'latitude' => 4.179950, 'longitude' => 73.508560],
+            ['name' => 'Fireworks Show', 'latitude' => 4.170329, 'longitude' => 73.506383],
+            ['name' => 'Ocean View Resort', 'latitude' => 4.175219, 'longitude' => 73.501647],
+            ['name' => 'City Center Hotel', 'latitude' => 4.175556, 'longitude' => 73.510069],
+            ['name' => 'Jungle Stay', 'latitude' => 4.174061, 'longitude' => 73.513014],
+        ];
+
+        foreach ($locations as $loc) {
+            \App\Models\MapLocation::create([
+                'name' => $loc['name'],
+                'latitude' => $loc['latitude'],
+                'longitude' => $loc['longitude'],
+            ]);
+        }
     }
 }
