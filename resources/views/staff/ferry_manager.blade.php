@@ -39,7 +39,7 @@
                     @foreach($trips as $trip)
                     <tr>
                         <td>{{ $trip->route_name }}</td>
-                        <td>{{ \Carbon\Carbon::parse($trip->departure_time)->format('M d, H:i') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($trip->departure_time)->format('M d, h:i A') }}</td>
                         <td>{{ $trip->tickets_count }}</td>
                         <td>
                             <form action="/ferry/trips/{{ $trip->id }}" method="POST">
@@ -62,7 +62,7 @@
                 <label>Assign Trip:</label>
                 <select name="ferry_trip_id" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc;">
                     @foreach($trips as $trip)
-                        <option value="{{ $trip->id }}">{{ $trip->route_name }} ({{ \Carbon\Carbon::parse($trip->departure_time)->format('H:i') }})</option>
+                        <option value="{{ $trip->id }}">{{ $trip->route_name }} ({{ \Carbon\Carbon::parse($trip->departure_time)->format('h:i A') }})</option>
                     @endforeach
                 </select>
                 <button style="width: 100%; background: green; color: white; border: none; padding: 10px; cursor: pointer;">Issue Ticket</button>
