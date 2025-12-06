@@ -134,5 +134,13 @@ class DatabaseSeeder extends Seeder
                 'longitude' => $loc['longitude'],
             ]);
         }
+
+        // 7. Promo
+        \App\Models\HotelPromotion::create([
+            'hotel_id' => $ocean->id,
+            'title' => 'Seashell Savings',
+            'discount_percent' => 5,
+            'description' => 'Enjoy a special discount on your Ocean View stay!'
+        ]);
     }
 }

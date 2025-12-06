@@ -32,7 +32,7 @@
                 <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 16px; border-left: 4px solid #28a745;">
                     <strong>{{ $hotel->promotion->title }}</strong>
                     <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.9em; margin-left: 8px;">
-                        {{ $hotel->promotion->discount_percent }} OFF
+                        {{ $hotel->promotion->discount_percent }}% OFF
                     </span>
                     <p style="margin: 4px 0 0 0;">{{ $hotel->promotion->description }}</p>
                 </div>
