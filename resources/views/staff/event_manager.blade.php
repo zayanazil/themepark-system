@@ -167,7 +167,7 @@
                                             </span>
                                         </div>
                                         <div style="color: #666; margin-bottom: 8px; font-size: 0.9em;">
-                                            🎡 {{ $promo->event->name }}
+                                            {{ $promo->event->name }}
                                         </div>
                                         @if($promo->description)
                                             <p style="margin: 0; color: #333; line-height: 1.5;">{{ $promo->description }}</p>
