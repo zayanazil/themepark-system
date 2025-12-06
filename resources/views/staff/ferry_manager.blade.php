@@ -1,6 +1,26 @@
 @extends('layouts.admin')
 
 @section('content')
+@if(session('success'))
+        <div style="background:#d1fae5; color:#065f46; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:600;">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div style="background:#fee2e2; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:600;">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if($errors->any())
+    <div style="background:#fee2e2; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:16px; font-weight:600;">
+        Please fix the following:
+        <ul style="margin-top:8px; margin-left:16px;">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     <style>
         /* Specific styles for Ferry grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
