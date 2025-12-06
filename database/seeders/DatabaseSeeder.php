@@ -48,12 +48,15 @@ class DatabaseSeeder extends Seeder
 
         foreach ([$ocean, $jungle, $city] as $hotel) {
             foreach ($roomTypes as $type => $data) {
-                Room::create([
-                    'hotel_id' => $hotel->id,
-                    'type' => $type,
-                    'price' => $data['price'],
-                    'capacity' => $data['capacity'],
-                ]);
+                // Create 3 rooms of each type for each hotel
+                for ($i = 1; $i <= 3; $i++) {
+                    Room::create([
+                        'hotel_id' => $hotel->id,
+                        'type' => $type,
+                        'price' => $data['price'],
+                        'capacity' => $data['capacity'],
+                    ]);
+                }
             }
         }
 
