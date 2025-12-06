@@ -34,11 +34,21 @@
                     <div class="form-group">
                         <label>Select Trip</label>
                         <select name="ferry_trip_id">
-                            @foreach($upcomingTrips as $trip)
-                                <option value="{{ $trip->id }}">
-                                    {{ $trip->route_name }} | {{ \Carbon\Carbon::parse($trip->departure_time)->format('M d, H:i A') }}
-                                </option>
-                            @endforeach
+                        @foreach($upcomingTrips as $trip)
+                            @php
+                                $remaining = $trip->capacity - $trip->tickets()->count();
+                            @endphp
+                        
+                            <option value="{{ $trip->id }}" @if($remaining <= 0) disabled @endif>
+                                {{ $trip->route_name }} |
+                                {{ \Carbon\Carbon::parse($trip->departure_time)->format('M d, H:i A') }}
+                                @if($remaining > 0)
+                                    ({{ $remaining }} seats left)
+                                @else
+                                    — FULL
+                                @endif
+                            </option>
+                        @endforeach
                         </select>
                     </div>
                     

@@ -15,4 +15,14 @@ class FerryTrip extends Model
     public function tickets() {
         return $this->hasMany(FerryTicket::class);
     }
+
+    public function remainingCapacity()
+    {
+        return $this->capacity - $this->tickets()->count();
+    }
+
+    public function isFull()
+    {
+        return $this->remainingCapacity() <= 0;
+    }
 }

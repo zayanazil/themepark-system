@@ -100,7 +100,7 @@ class HotelController extends Controller
         $message = "Room #{$room->id} ({$room->type}) booked successfully!";
         
         if ($promotion) {
-            $message .= " 🎉 {$promotion->title}: {$discount}% discount applied! Original: $" . number_format($basePrice, 2) . " → Final: $" . number_format($totalPrice, 2);
+            $message .= " {$promotion->title}: {$discount}% discount applied! Original: $" . number_format($basePrice, 2) . " → Final: $" . number_format($totalPrice, 2);
         } else {
             $message .= " Total Cost: $" . number_format($totalPrice, 2);
         }

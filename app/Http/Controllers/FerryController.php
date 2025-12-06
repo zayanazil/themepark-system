@@ -34,20 +34,30 @@ class FerryController extends Controller
         $booking = HotelBooking::where('user_id', Auth::id())
                         ->where('status', 'confirmed')
                         ->first();
-
+    
         if (!$booking) {
             return back()->with('error', 'No valid hotel booking found.');
         }
-
-        $request->validate(['ferry_trip_id' => 'required']);
-
+    
+        $request->validate([
+            'ferry_trip_id' => 'required|exists:ferry_trips,id'
+        ]);
+    
+        // Get trip with current ticket count
+        $trip = FerryTrip::withCount('tickets')->find($request->ferry_trip_id);
+    
+        if ($trip->tickets_count >= $trip->capacity) {
+            return back()->with('error', 'This ferry is full. No tickets remaining.');
+        }
+    
         FerryTicket::create([
             'user_id' => Auth::id(),
             'hotel_booking_id' => $booking->id,
-            'ferry_trip_id' => $request->ferry_trip_id,
+            'ferry_trip_id' => $trip->id,
             'status' => 'valid'
         ]);
-
+    
         return back()->with('success', 'Ferry ticket booked!');
     }
+
 }
