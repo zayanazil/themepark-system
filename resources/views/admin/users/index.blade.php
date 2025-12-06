@@ -3,6 +3,57 @@
 @section('content')
     <h1>👥 User Management</h1>
 
+    {{-- CREATE USER FORM --}}
+    <div class="card" style="padding: 20px; margin-bottom: 20px;">
+        <h2 style="margin-bottom: 10px;">➕ Create New User</h2>
+
+        <form action="/manage/users" method="POST" style="display: grid; gap: 10px; max-width: 400px;">
+            @csrf
+
+            <input 
+                type="text" 
+                name="name" 
+                placeholder="Full Name" 
+                required
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+
+            <input 
+                type="email" 
+                name="email" 
+                placeholder="Email Address" 
+                required
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+
+            <input 
+                type="password" 
+                name="password" 
+                placeholder="Temporary Password" 
+                required
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+
+            <select 
+                name="role" 
+                style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+                required
+            >
+                <option value="visitor">Visitor</option>
+                <option value="hotel_manager">Hotel Manager</option>
+                <option value="ferry_staff">Ferry Staff</option>
+                <option value="theme_park_staff">Park Staff</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button 
+                style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                Create User
+            </button>
+        </form>
+    </div>
+
+    {{-- USER TABLE --}}
     <div class="card">
         <table>
             <thead>
