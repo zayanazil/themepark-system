@@ -90,7 +90,8 @@ Route::middleware(['auth', 'role:ferry_staff'])->group(function () {
 // Theme Park Staff
 Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
     Route::get('/themepark/dashboard', [AdminEventController::class, 'index']);
-    Route::resource('manage/events', AdminEventController::class);
+    // Add this route to your web.php file:
+    Route::post('/manage/events', [AdminEventController::class, 'store'])->name('events.store');
 
     // Additional routes
     Route::post('/themepark/sell', [AdminEventController::class, 'manualSale']);

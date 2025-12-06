@@ -27,20 +27,24 @@ class AdminEventController extends Controller
     // 2. CREATE EVENT (With Category)
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required',
-            'category' => 'required',
-            'description' => 'required',
-            'capacity' => 'required|integer',
-            'event_date' => 'required|date',
-            'event_time' => 'required',
-            'price' => 'required|integer'
-        ]);
-
-        ThemeParkEvent::create($data);
-        return back()->with('success', 'Activity scheduled successfully');
+        try {
+            $data = $request->validate([
+                'name' => 'required|max:255',
+                'category' => 'required',
+                'description' => 'required',
+                'capacity' => 'required|integer|min:1',
+                'event_date' => 'required|date|after_or_equal:today',
+                'event_time' => 'required',
+                'price' => 'required|numeric|min:0'
+            ]);
+        
+            $event = ThemeParkEvent::create($data);
+            
+            return back()->with('success', 'Activity scheduled successfully! Event ID: ' . $event->id);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to schedule event: ' . $e->getMessage());
+        }
     }
-
     // 3. SELL TICKET AT ENTRANCE (Manual Sale)
     public function manualSale(Request $request)
     {

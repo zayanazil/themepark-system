@@ -11,9 +11,23 @@
         .bg-valid { background: green; }
         .bg-redeemed { background: gray; }
         .bg-cancelled { background: red; }
+        .alert { padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; font-weight: 500; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 
     <h1>🎡 Park Operations</h1>
+    @if(session('success'))
+        <div class="alert alert-success">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-error">
+            ❌ {{ session('error') }}
+        </div>
+    @endif
 
     <div class="stat-grid">
         <div class="stat-box">
@@ -66,6 +80,10 @@
             <form action="/manage/events" method="POST">
                 @csrf
                 <input type="text" name="name" placeholder="Name" required style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #ccc;">
+                <!-- Add this after the name input in the schedule form: -->
+                <textarea name="description" placeholder="Event Description" required 
+                    style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #ccc; min-height: 80px; margin-top:5px;">
+                </textarea>
                 <select name="category" style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #ccc;">
                     <option>Ride</option><option>Show</option><option>Beach Event</option><option>General</option>
                 </select>
