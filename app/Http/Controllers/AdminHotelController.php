@@ -111,7 +111,7 @@ class AdminHotelController extends Controller
         HotelPromotion::create([
             'hotel_id' => $request->hotel_id,
             'title' => $request->title,
-            'discount_percent' => $request->discount_percent . '%',
+            'discount_percent' => $request->discount_percent,
             'description' => $request->description
         ]);
     

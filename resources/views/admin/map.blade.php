@@ -4,11 +4,6 @@
     <h1>📍 Manage Map Locations</h1>
 
     <!-- Add success/error messages -->
-    @if(session('success'))
-        <div style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
-            {{ session('success') }}
-        </div>
-    @endif
     
     @if(session('error'))
         <div style="background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
