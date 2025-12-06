@@ -21,4 +21,15 @@ class MapController extends Controller
         ]));
         return back()->with('success', 'Location added');
     }
+
+    public function destroy($id)
+    {
+        try {
+            $location = MapLocation::findOrFail($id);
+            $location->delete();
+            return back()->with('success', 'Location removed successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to remove location: ' . $e->getMessage());
+        }
+    }
 }
