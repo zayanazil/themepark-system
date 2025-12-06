@@ -25,7 +25,7 @@
     
     @if(session('error'))
         <div class="alert alert-error">
-            ❌ {{ session('error') }}
+            s{{ session('error') }}
         </div>
     @endif
 

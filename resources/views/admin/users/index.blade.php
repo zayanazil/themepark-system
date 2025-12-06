@@ -1,6 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
+    @if ($errors->any())
+        <div style="background: #fee; border: 1px solid #fcc; color: #c33; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 14px;">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
     <h1>👥 User Management</h1>
 
     {{-- CREATE USER FORM --}}
