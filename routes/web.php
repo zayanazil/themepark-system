@@ -96,8 +96,10 @@ Route::middleware(['auth', 'role:theme_park_staff'])->group(function () {
 
     // Additional routes
     Route::post('/themepark/sell', [AdminEventController::class, 'manualSale']);
-    Route::post('/themepark/validate', [AdminEventController::class, 'validateTicket']);
-    Route::post('/themepark/promote', [AdminEventController::class, 'storePromotion']);
+    
+    // Promotions
+    Route::post('/themepark/promotions', [AdminEventController::class, 'storePromotion']);
+    Route::delete('/themepark/promotions/{id}', [AdminEventController::class, 'deletePromotion']);
 });
 
 // --- VISITOR ---

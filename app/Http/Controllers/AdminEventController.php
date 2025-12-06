@@ -13,14 +13,15 @@ class AdminEventController extends Controller
     // 1. MAIN DASHBOARD (Reports + Overview)
     public function index()
     {
-        $events = ThemeParkEvent::withCount('bookings')->get();
-
+        $events = ThemeParkEvent::with('promotion')->withCount('bookings')->get();
+        
         // Reports Logic
         $totalRevenue = EventBooking::where('status', '!=', 'cancelled')->sum('total_price');
         $totalTicketsSold = EventBooking::where('status', '!=', 'cancelled')->sum('tickets');
+        
         $bookings = EventBooking::with(['user', 'event'])->latest()->get();
         $promotions = EventPromotion::with('event')->get();
-
+        
         return view('staff.event_manager', compact('events', 'bookings', 'totalRevenue', 'totalTicketsSold', 'promotions'));
     }
 
@@ -45,44 +46,57 @@ class AdminEventController extends Controller
             return back()->with('error', 'Failed to schedule event: ' . $e->getMessage());
         }
     }
+
     // 3. SELL TICKET AT ENTRANCE (Manual Sale)
     public function manualSale(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email', // Must sell to a registered user
-            'event_id' => 'required',
+            'email' => 'required|email|exists:users,email',
+            'event_id' => 'required|exists:theme_park_events,id',
             'tickets' => 'required|integer|min:1'
         ]);
 
         $user = User::where('email', $request->email)->first();
-        $event = ThemeParkEvent::find($request->event_id);
+        $event = ThemeParkEvent::with('promotion')->findOrFail($request->event_id);
 
-        // Check Capacity
-        $sold = $event->bookings()->where('status', '!=', 'cancelled')->sum('tickets');
-        if (($sold + $request->tickets) > $event->capacity) {
-            return back()->with('error', 'Sold out! Cannot process ticket.');
+        // Check capacity using model method
+        if ($request->tickets > $event->remaining_capacity) {
+            return back()->with('error', "Not enough capacity! Only {$event->remaining_capacity} tickets remaining.");
+        }
+
+        // Calculate price with discount
+        $basePrice = $event->price * $request->tickets;
+        $totalPrice = $basePrice;
+        $promotion = $event->promotion;
+
+        if ($promotion) {
+            $totalPrice = $promotion->applyDiscount($basePrice);
         }
 
         EventBooking::create([
             'user_id' => $user->id,
             'event_id' => $event->id,
             'tickets' => $request->tickets,
-            'total_price' => $event->price * $request->tickets,
+            'total_price' => $totalPrice,
             'status' => 'valid'
         ]);
 
-        return back()->with('success', 'Ticket sold at entrance!');
+        $message = "Ticket sold at entrance!";
+        if ($promotion) {
+            $message .= " (Discount applied: {$promotion->discount_percent}%)";
+        }
+
+        return back()->with('success', $message);
     }
 
     // 4. VALIDATE TICKET (Scanner Interface)
     public function validateTicket(Request $request)
     {
-        // Staff enters Booking ID to "Scan" it
-        $booking = EventBooking::find($request->booking_id);
+        $request->validate([
+            'booking_id' => 'required|exists:event_bookings,id'
+        ]);
 
-        if (!$booking) {
-            return back()->with('error', 'Invalid Ticket ID.');
-        }
+        $booking = EventBooking::with('user')->findOrFail($request->booking_id);
 
         if ($booking->status === 'redeemed') {
             return back()->with('error', 'Ticket already used!');
@@ -102,18 +116,50 @@ class AdminEventController extends Controller
     // 5. CREATE PROMOTION
     public function storePromotion(Request $request)
     {
-        EventPromotion::create($request->validate([
-            'event_id' => 'required',
-            'title' => 'required',
-            'discount_details' => 'required'
-        ]));
-        return back()->with('success', 'Promotion Active');
+        $request->validate([
+            'event_id' => 'required|exists:theme_park_events,id',
+            'title' => 'required|string|max:255',
+            'discount_percent' => 'required|integer|min:1|max:100',
+            'description' => 'nullable|string'
+        ]);
+
+        // Check if event already has promotion
+        $existingPromo = EventPromotion::where('event_id', $request->event_id)->first();
+        
+        if ($existingPromo) {
+            return back()->with('error', 'This event already has an active promotion. Remove it first.');
+        }
+
+        EventPromotion::create([
+            'event_id' => $request->event_id,
+            'title' => $request->title,
+            'discount_percent' => $request->discount_percent,
+            'description' => $request->description
+        ]);
+
+        return back()->with('success', 'Promotion created successfully!');
     }
 
-    // 6. DELETE EVENT
+    // 6. DELETE PROMOTION
+    public function deletePromotion($id)
+    {
+        $promotion = EventPromotion::findOrFail($id);
+        $promotion->delete();
+
+        return back()->with('success', 'Promotion deleted successfully!');
+    }
+
+    // 7. DELETE EVENT
     public function destroy($id)
     {
-        ThemeParkEvent::destroy($id);
-        return back()->with('success', 'Event Removed');
+        $event = ThemeParkEvent::findOrFail($id);
+        
+        // Check if event has bookings
+        if ($event->bookings()->count() > 0) {
+            return back()->with('error', 'Cannot delete event with existing bookings.');
+        }
+
+        $event->delete();
+        return back()->with('success', 'Event deleted successfully!');
     }
 }
